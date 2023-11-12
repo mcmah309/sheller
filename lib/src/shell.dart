@@ -1,72 +1,6 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
-/// Configuration for conversions between shell results and dart types
-class ShellConversionConfig {
-  /// regex splitter used by List and Set converters. Splits by whitespace. Consider changing to
-  /// ```
-  /// RegExp(r'\r?\n')
-  /// ```
-  /// If you prefer just newlines
-  static RegExp splitter = RegExp(r'\s+');
-  static final Map<dynamic, Converter<String, dynamic>> _map = {
-    int: const IntConverter(),
-    double: const DoubleConverter(),
-    num: const NumConverter(),
-    BigInt: const BigIntConverter(),
-    String: const StringConverter(),
-    bool: const BoolConverter(),
-    List<String>: const ListStringConverter(),
-    List<int>: const ListIntConverter(),
-    List<double>: const ListDoubleConverter(),
-    List<num>: const ListNumConverter(),
-    List<BigInt>: const ListBigIntConverter(),
-    List<bool>: const ListBoolConverter(),
-    Map<String, dynamic>: JsonConverter(),
-    Set<int>: const SetIntConverter(),
-    Set<double>: const SetDoubleConverter(),
-    Set<num>: const SetNumConverter(),
-    Set<BigInt>: const SetBigIntConverter(),
-    Set<String>: const SetStringConverter(),
-    Set<bool>: const SetBoolConverter(),
-    Object: const StringConverter(),
-  };
-
-  static void add<T>(Converter<String, T> value) {
-    _map[T] = value;
-  }
-
-  static Converter<String, T> get<T>() {
-    assert(_map.containsKey(T), "ShellConversionMap does not contain a converter for ${T.toString()}");
-    return _map[T] as Converter<String, T>;
-  }
-
-  static bool hasConverterFor<T>() {
-    return _map.containsKey(T);
-  }
-}
-
-/// Config for how the shell should behave
-class ShellConfig {
-  final String? workingDirectory;
-  final Map<String, String>? environment;
-  final bool includeParentEnvironment;
-  final bool runInShell;
-  final Encoding stdoutEncoding;
-  final Encoding stderrEncoding;
-  final bool trimResult;
-
-  const ShellConfig({
-    this.workingDirectory,
-    this.environment,
-    this.includeParentEnvironment = true,
-    this.runInShell = true,
-    this.stdoutEncoding = io.systemEncoding,
-    this.stderrEncoding = io.systemEncoding,
-    this.trimResult = true,
-  });
-}
-
 /// Convenience function for executing a shell and converting the result to a dart type
 Future<T> shell<T extends Object>(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
   return Shell(cmd, shellConfig)();
@@ -77,10 +11,18 @@ Future<T> shell<T extends Object>(String cmd, [ShellConfig shellConfig = const S
 class Shell {
   late final Future<io.ProcessResult> rawResult;
 
-  Future<String> get stringResult => _stringResult();
+  /// Returns the result as a [String]. Will throw a [ShellException] if the shell process did not exit with 0 as the
+  /// status code.
+  Future<String> get stringResult {
+    if (_stringResult != null) {
+      return _stringResult!;
+    }
+    _stringResult = rawResult.then(_processResultToString);
+    return _stringResult!;
+  }
 
   // Lazily evaluated so the Shell will not throw unless the Result as a string is requested
-  late final Lazy<Future<String>> _stringResult = Lazy(() => rawResult.then(_processResultToString));
+  Future<String>? _stringResult;
   late final String Function(io.ProcessResult) _processResultToString;
 
   Shell(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
@@ -106,7 +48,10 @@ class Shell {
     };
   }
 
-  Future<T> call<T>() {
+  /// Converts the shell result into the desired type [T]. Will throw a [ShellException] if the shell process did not
+  /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
+  /// type [T].
+  Future<T> call<T extends Object>() {
     return stringResult.then((s) {
       final converter = ShellConversionConfig.get<T>();
       return converter.convert(s);
@@ -114,22 +59,77 @@ class Shell {
   }
 }
 
-class Lazy<T> {
-  static final _cache = Expando();
-  final T Function() _func;
+//************************************************************************//
 
-  const Lazy(this._func);
+/// Configuration for conversions between shell results and dart types. Can be modified at runtime.
+class ShellConversionConfig {
+  /// regex splitter used by List and Set converters. Splits by whitespace. Consider changing to
+  /// ```
+  /// RegExp(r'\r?\n')
+  /// ```
+  /// If you prefer just newlines
+  static RegExp splitter = RegExp(r'\s+');
+  static final Map<Object, Converter<String, Object>> _map = {
+    int: const IntConverter(),
+    double: const DoubleConverter(),
+    num: const NumConverter(),
+    BigInt: const BigIntConverter(),
+    String: const StringConverter(),
+    bool: const BoolConverter(),
+    List<String>: const ListStringConverter(),
+    List<int>: const ListIntConverter(),
+    List<double>: const ListDoubleConverter(),
+    List<num>: const ListNumConverter(),
+    List<BigInt>: const ListBigIntConverter(),
+    List<bool>: const ListBoolConverter(),
+    Map<String, dynamic>: JsonConverter(),
+    Set<int>: const SetIntConverter(),
+    Set<double>: const SetDoubleConverter(),
+    Set<num>: const SetNumConverter(),
+    Set<BigInt>: const SetBigIntConverter(),
+    Set<String>: const SetStringConverter(),
+    Set<bool>: const SetBoolConverter(),
+    Object: const StringConverter(),
+  };
 
-  T call() {
-    var result = _cache[this];
-    if (identical(this, result)) return null as T;
-    if (result != null) return result as T;
-    result = _func();
-    _cache[this] = (result == null) ? this : result;
-    return result as T;
+  static void add<T extends Object>(Converter<String, T> value) {
+    _map[T] = value;
+  }
+
+  static Converter<String, T> get<T extends Object>() {
+    assert(_map.containsKey(T), "ShellConversionMap does not contain a converter for ${T.toString()}");
+    return _map[T] as Converter<String, T>;
+  }
+
+  static bool hasConverterFor<T extends Object>() {
+    return _map.containsKey(T);
   }
 }
 
+/// Config for how the shell should behave
+class ShellConfig {
+  final String? workingDirectory;
+  final Map<String, String>? environment;
+  final bool includeParentEnvironment;
+  final bool runInShell;
+  final Encoding stdoutEncoding;
+  final Encoding stderrEncoding;
+  final bool trimResult;
+
+  const ShellConfig({
+    this.workingDirectory,
+    this.environment,
+    this.includeParentEnvironment = true,
+    this.runInShell = true,
+    this.stdoutEncoding = io.systemEncoding,
+    this.stderrEncoding = io.systemEncoding,
+    this.trimResult = true,
+  });
+}
+
+//************************************************************************//
+
+/// An [Exception] that happened inside the shell
 class ShellException implements Exception {
   final int exitCode;
   final int pid;
@@ -141,7 +141,7 @@ class ShellException implements Exception {
   @override
   String toString() {
     return """
-    ShellException: The shell process $pid failed with
+    ShellException: The shell process with PID $pid failed with
     
     Exit Code: $exitCode
     
@@ -152,6 +152,7 @@ class ShellException implements Exception {
   }
 }
 
+/// An [Exception] that happen when converting the shell result to the desired result type
 class ShellResultConversionException implements Exception {
   final String from;
   final Type to;
@@ -161,9 +162,7 @@ class ShellResultConversionException implements Exception {
   @override
   String toString() {
     return """
-    ShellResultConversionException: could not convert to $to from
-    
-    $from
+    ShellResultConversionException: could not convert to '$to' from '$from'
     """;
   }
 }
@@ -217,8 +216,6 @@ class BigIntConverter extends Converter<String, BigInt> {
     }
   }
 }
-
-//************************************************************************//
 
 class StringConverter extends Converter<String, String> {
   const StringConverter();
