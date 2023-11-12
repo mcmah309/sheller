@@ -1,6 +1,6 @@
 name: sheller
 description: Convenience utilities for interacting with and converting shell output.
-version: 0.1.0
+version: 0.2.0
 repository: https://github.com/mcmah309/sheller
 
 environment:
