@@ -1,12 +1,23 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
-Process<T> shell<T extends Object>(String cmd, [ShellConfig processConfig = const ShellConfig()]) {
-  final converter = ShellConversionMap.get<T>();
-  return Process._(cmd, processConfig, converter);
+void main() async {
+  final int y = await shell("echo 1");
+  assert(y == 1);
+  String data = '{"id":1, "name":"lorem ipsum", "address":"dolor set amet"}';
+  final Map<String, dynamic> w = await shell('echo $data');
+  final List<double> d = await shell('echo 1 2 3');
+  int i = 3;
+  assert(w == "1");
 }
 
-class ShellConversionMap {
+class ShellConversionConfig {
+  /// regex splitter used by List and Set converters. Splits by whitespace. Consider changing to
+  /// ```
+  /// RegExp(r'\r?\n')
+  /// ```
+  /// If you prefer just newlines
+  static RegExp splitter = RegExp(r'\s+');
   static final Map<Object, Converter<String, Object>> _map = {
     int: const IntConverter(),
     double: const DoubleConverter(),
@@ -21,12 +32,14 @@ class ShellConversionMap {
     List<BigInt>: const ListBigIntConverter(),
     List<bool>: const ListBoolConverter(),
     Map<String, dynamic>: JsonConverter(),
+    //dynamic: JsonConverter(),
     Set<int>: const SetIntConverter(),
     Set<double>: const SetDoubleConverter(),
     Set<num>: const SetNumConverter(),
     Set<BigInt>: const SetBigIntConverter(),
     Set<String>: const SetStringConverter(),
     Set<bool>: const SetBoolConverter(),
+    Object: const StringConverter(),
   };
 
   static void add<T extends Object>(Converter<String, T> value) {
@@ -36,6 +49,10 @@ class ShellConversionMap {
   static Converter<String, T> get<T extends Object>() {
     assert(_map.containsKey(T), "ShellConversionMap does not contain a converter for ${T.toString()}");
     return _map[T] as Converter<String, T>;
+  }
+
+  static bool hasConverterFor<T extends Object>() {
+    return _map.containsKey(T);
   }
 }
 
@@ -59,12 +76,9 @@ class ShellConfig {
   });
 }
 
-class Process<T extends Object> {
-  late final Future<T> result;
-
-  Process._(String cmd, ShellConfig shellConfig, Converter<String, dynamic> converter) {
-    result = io.Process.run(
-      cmd,
+Future<T> shell<T extends Object>(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
+  return io.Process.run(
+    cmd,
       [],
       workingDirectory: shellConfig.workingDirectory ?? io.Directory.current.path,
       environment: shellConfig.environment,
@@ -77,17 +91,13 @@ class Process<T extends Object> {
         throw ShellException(e.exitCode, e.pid, e.stdout, e.stderr);
       }
       String stringResult = (e.stdout as String);
-      if (shellConfig.trimResult) {
-        stringResult = stringResult.trim();
+    if (shellConfig.trimResult) {
+      stringResult = stringResult.trim();
       }
-      return converter.convert(stringResult) as T;
-    });
+    final converter = ShellConversionConfig.get<T>();
+    return converter.convert(stringResult);
+  });
   }
-
-  Future<T> call() {
-    return result;
-  }
-}
 
 class ShellException implements Exception {
   final int exitCode;
@@ -127,12 +137,7 @@ class ShellResultConversionException implements Exception {
   }
 }
 
-void main() async {
-  final int y = await shell<int>("echo 1")();
-  assert(y == 1);
-  final String w = await shell<String>("echo 1")();
-  assert(w == "1");
-}
+//************************************************************************//
 
 class IntConverter extends Converter<String, int> {
   const IntConverter();
@@ -214,7 +219,7 @@ class ListStringConverter extends Converter<String, List<String>> {
 
   @override
   List<String> convert(String input) {
-    return input.split('\n');
+    return input.split(ShellConversionConfig.splitter);
   }
 }
 
@@ -223,7 +228,7 @@ class ListIntConverter extends Converter<String, List<int>> {
 
   @override
   List<int> convert(String input) {
-    return input.split('\n').map((e) => const IntConverter().convert(e)).toList();
+    return input.split(ShellConversionConfig.splitter).map((e) => const IntConverter().convert(e)).toList();
   }
 }
 
@@ -232,7 +237,7 @@ class ListDoubleConverter extends Converter<String, List<double>> {
 
   @override
   List<double> convert(String input) {
-    return input.split('\n').map((e) => const DoubleConverter().convert(e)).toList();
+    return input.split(ShellConversionConfig.splitter).map((e) => const DoubleConverter().convert(e)).toList();
   }
 }
 
@@ -241,7 +246,7 @@ class ListNumConverter extends Converter<String, List<num>> {
 
   @override
   List<num> convert(String input) {
-    return input.split('\n').map((e) => const NumConverter().convert(e)).toList();
+    return input.split(ShellConversionConfig.splitter).map((e) => const NumConverter().convert(e)).toList();
   }
 }
 
@@ -250,7 +255,7 @@ class ListBigIntConverter extends Converter<String, List<BigInt>> {
 
   @override
   List<BigInt> convert(String input) {
-    return input.split('\n').map((e) => const BigIntConverter().convert(e)).toList();
+    return input.split(ShellConversionConfig.splitter).map((e) => const BigIntConverter().convert(e)).toList();
   }
 }
 
@@ -259,7 +264,7 @@ class ListBoolConverter extends Converter<String, List<bool>> {
 
   @override
   List<bool> convert(String input) {
-    return input.split('\n').map((e) => const BoolConverter().convert(e)).toList();
+    return input.split(ShellConversionConfig.splitter).map((e) => const BoolConverter().convert(e)).toList();
   }
 }
 
@@ -270,7 +275,15 @@ class JsonConverter extends Converter<String, Map<String, dynamic>> {
 
   @override
   Map<String, dynamic> convert(String input) {
-    return json.decode(input);
+    try {
+      return json.decode(input);
+    } catch (e1) {
+      try {
+        return json.decode(input.replaceAll("\\", ""));
+      } catch (e2) {
+        throw ShellResultConversionException(Map<String, dynamic>, input);
+      }
+    }
   }
 }
 
@@ -281,7 +294,7 @@ class SetStringConverter extends Converter<String, Set<String>> {
 
   @override
   Set<String> convert(String input) {
-    return input.split('\n').toSet();
+    return input.split(ShellConversionConfig.splitter).toSet();
   }
 }
 
@@ -290,7 +303,7 @@ class SetIntConverter extends Converter<String, Set<int>> {
 
   @override
   Set<int> convert(String input) {
-    return input.split('\n').map((e) => const IntConverter().convert(e)).toSet();
+    return input.split(ShellConversionConfig.splitter).map((e) => const IntConverter().convert(e)).toSet();
   }
 }
 
@@ -299,7 +312,7 @@ class SetDoubleConverter extends Converter<String, Set<double>> {
 
   @override
   Set<double> convert(String input) {
-    return input.split('\n').map((e) => const DoubleConverter().convert(e)).toSet();
+    return input.split(ShellConversionConfig.splitter).map((e) => const DoubleConverter().convert(e)).toSet();
   }
 }
 
@@ -308,7 +321,7 @@ class SetNumConverter extends Converter<String, Set<num>> {
 
   @override
   Set<num> convert(String input) {
-    return input.split('\n').map((e) => const NumConverter().convert(e)).toSet();
+    return input.split(ShellConversionConfig.splitter).map((e) => const NumConverter().convert(e)).toSet();
   }
 }
 
@@ -317,7 +330,7 @@ class SetBigIntConverter extends Converter<String, Set<BigInt>> {
 
   @override
   Set<BigInt> convert(String input) {
-    return input.split('\n').map((e) => const BigIntConverter().convert(e)).toSet();
+    return input.split(ShellConversionConfig.splitter).map((e) => const BigIntConverter().convert(e)).toSet();
   }
 }
 
@@ -326,6 +339,6 @@ class SetBoolConverter extends Converter<String, Set<bool>> {
 
   @override
   Set<bool> convert(String input) {
-    return input.split('\n').map((e) => const BoolConverter().convert(e)).toSet();
+    return input.split(ShellConversionConfig.splitter).map((e) => const BoolConverter().convert(e)).toSet();
   }
 }
