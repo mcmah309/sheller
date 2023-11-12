@@ -1,16 +1,7 @@
 import 'dart:convert';
 import 'dart:io' as io;
 
-void main() async {
-  final int y = await shell("echo 1");
-  assert(y == 1);
-  String data = '{"id":1, "name":"lorem ipsum", "address":"dolor set amet"}';
-  final Map<String, dynamic> w = await shell('echo $data');
-  final List<double> d = await shell('echo 1 2 3');
-  int i = 3;
-  assert(w == "1");
-}
-
+/// Configuration for conversions between shell results and dart types
 class ShellConversionConfig {
   /// regex splitter used by List and Set converters. Splits by whitespace. Consider changing to
   /// ```
@@ -18,7 +9,7 @@ class ShellConversionConfig {
   /// ```
   /// If you prefer just newlines
   static RegExp splitter = RegExp(r'\s+');
-  static final Map<Object, Converter<String, Object>> _map = {
+  static final Map<dynamic, Converter<String, dynamic>> _map = {
     int: const IntConverter(),
     double: const DoubleConverter(),
     num: const NumConverter(),
@@ -32,7 +23,6 @@ class ShellConversionConfig {
     List<BigInt>: const ListBigIntConverter(),
     List<bool>: const ListBoolConverter(),
     Map<String, dynamic>: JsonConverter(),
-    //dynamic: JsonConverter(),
     Set<int>: const SetIntConverter(),
     Set<double>: const SetDoubleConverter(),
     Set<num>: const SetNumConverter(),
@@ -42,20 +32,21 @@ class ShellConversionConfig {
     Object: const StringConverter(),
   };
 
-  static void add<T extends Object>(Converter<String, T> value) {
+  static void add<T>(Converter<String, T> value) {
     _map[T] = value;
   }
 
-  static Converter<String, T> get<T extends Object>() {
+  static Converter<String, T> get<T>() {
     assert(_map.containsKey(T), "ShellConversionMap does not contain a converter for ${T.toString()}");
     return _map[T] as Converter<String, T>;
   }
 
-  static bool hasConverterFor<T extends Object>() {
+  static bool hasConverterFor<T>() {
     return _map.containsKey(T);
   }
 }
 
+/// Config for how the shell should behave
 class ShellConfig {
   final String? workingDirectory;
   final Map<String, String>? environment;
@@ -76,9 +67,25 @@ class ShellConfig {
   });
 }
 
+/// Convenience function for executing a shell and converting the result to a dart type
 Future<T> shell<T extends Object>(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
-  return io.Process.run(
-    cmd,
+  return Shell(cmd, shellConfig)();
+}
+
+/// Wrapper around [io.Process.run] that makes running a shell and converting the result back into a dart type more
+/// convenient
+class Shell {
+  late final Future<io.ProcessResult> rawResult;
+
+  Future<String> get stringResult => _stringResult();
+
+  // Lazily evaluated so the Shell will not throw unless the Result as a string is requested
+  late final Lazy<Future<String>> _stringResult = Lazy(() => rawResult.then(_processResultToString));
+  late final String Function(io.ProcessResult) _processResultToString;
+
+  Shell(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
+    rawResult = io.Process.run(
+      cmd,
       [],
       workingDirectory: shellConfig.workingDirectory ?? io.Directory.current.path,
       environment: shellConfig.environment,
@@ -86,18 +93,42 @@ Future<T> shell<T extends Object>(String cmd, [ShellConfig shellConfig = const S
       runInShell: shellConfig.runInShell,
       stdoutEncoding: shellConfig.stdoutEncoding,
       stderrEncoding: shellConfig.stderrEncoding,
-    ).then((e) {
+    );
+    _processResultToString = (io.ProcessResult e) {
       if (e.exitCode != 0) {
         throw ShellException(e.exitCode, e.pid, e.stdout, e.stderr);
       }
       String stringResult = (e.stdout as String);
-    if (shellConfig.trimResult) {
-      stringResult = stringResult.trim();
+      if (shellConfig.trimResult) {
+        stringResult = stringResult.trim();
       }
-    final converter = ShellConversionConfig.get<T>();
-    return converter.convert(stringResult);
-  });
+      return stringResult;
+    };
   }
+
+  Future<T> call<T>() {
+    return stringResult.then((s) {
+      final converter = ShellConversionConfig.get<T>();
+      return converter.convert(s);
+    });
+  }
+}
+
+class Lazy<T> {
+  static final _cache = Expando();
+  final T Function() _func;
+
+  const Lazy(this._func);
+
+  T call() {
+    var result = _cache[this];
+    if (identical(this, result)) return null as T;
+    if (result != null) return result as T;
+    result = _func();
+    _cache[this] = (result == null) ? this : result;
+    return result as T;
+  }
+}
 
 class ShellException implements Exception {
   final int exitCode;
