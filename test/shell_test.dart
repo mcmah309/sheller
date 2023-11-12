@@ -24,4 +24,9 @@ void main() {
     final List<double> d = await shell('echo 1 2 3');
     expect(d.length, 3);
   });
+
+  test('sync', () {
+    final int y = shellSync("echo 1");
+    expect(y, 1);
+  });
 }

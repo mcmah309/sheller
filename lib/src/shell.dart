@@ -61,6 +61,64 @@ class Shell {
 
 //************************************************************************//
 
+/// Convenience function for executing a shell and converting the result to a dart type
+T shellSync<T extends Object>(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
+  return ShellSync(cmd, shellConfig)();
+}
+
+/// Wrapper around [io.Process.runSync] that makes running a shell and converting the result back into a dart type more
+/// convenient
+class ShellSync {
+  late final io.ProcessResult rawResult;
+
+  /// Returns the result as a [String]. Will throw a [ShellException] if the shell process did not exit with 0 as the
+  /// status code.
+  String get stringResult {
+    if (_stringResult != null) {
+      return _stringResult!;
+    }
+    _stringResult = _processResultToString(rawResult);
+    return _stringResult!;
+  }
+
+  // Lazily evaluated so the Shell will not throw unless the Result as a string is requested
+  String? _stringResult;
+  late final String Function(io.ProcessResult) _processResultToString;
+
+  ShellSync(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
+    rawResult = io.Process.runSync(
+      cmd,
+      [],
+      workingDirectory: shellConfig.workingDirectory ?? io.Directory.current.path,
+      environment: shellConfig.environment,
+      includeParentEnvironment: shellConfig.includeParentEnvironment,
+      runInShell: shellConfig.runInShell,
+      stdoutEncoding: shellConfig.stdoutEncoding,
+      stderrEncoding: shellConfig.stderrEncoding,
+    );
+    _processResultToString = (io.ProcessResult e) {
+      if (e.exitCode != 0) {
+        throw ShellException(e.exitCode, e.pid, e.stdout, e.stderr);
+      }
+      String stringResult = (e.stdout as String);
+      if (shellConfig.trimResult) {
+        stringResult = stringResult.trim();
+      }
+      return stringResult;
+    };
+  }
+
+  /// Converts the shell result into the desired type [T]. Will throw a [ShellException] if the shell process did not
+  /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
+  /// type [T].
+  T call<T extends Object>() {
+    final converter = ShellConversionConfig.get<T>();
+    return converter.convert(stringResult);
+  }
+}
+
+//************************************************************************//
+
 /// Configuration for conversions between shell results and dart types. Can be modified at runtime.
 class ShellConversionConfig {
   /// regex splitter used by List and Set converters. Splits by whitespace. Consider changing to
