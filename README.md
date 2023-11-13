@@ -1,6 +1,6 @@
 # sheller
 
-Convenience utilities for interacting with and converting shell output.
+Convenience utilities for interacting with and converting shell output. Useful for writing dart scripts.
 
 ### Example
 
@@ -13,11 +13,8 @@ List<Directory> files = shellSync("cd $outputDir && dart pub run index_generator
 
 ```dart
 // int
-int y = await
-shell
-("echo 1
-"
-);expect(y, 1);
+int y = await shell("echo 1");
+expect(y, 1);
 // json
 String data = '{"id":1, "name":"lorem ipsum", "address":"dolor set amet"}';
 Map<String, dynamic> w = await shell('echo $data');
@@ -29,82 +26,44 @@ expect(d.length, 3);
 ShellSync shellClass = ShellSync("echo 1");
 int id = shell.rawResult.pid; // shell.rawResult.runtimeType == ProcessResult
 String stringResult = shell.stringResult; // == "1"
-int
-convertedResult
-=
-shellClass
-(
-); // == 1
+int convertedResult = shellClass(); // == 1
 ```
 
 ### Valid Conversion Types
 
-```dart
+```
 int
 double
-
 num
 BigInt
-
 String
 bool
-
 List<String>
-List
-<
-int>
-
+List<int>
 List<double>
-List
-<
-num>
-
+List<num>
 List<BigInt>
-List
-<
-bool>Map<String, dynamic>: JsonConverter
-(),
-
+List<bool>
+Map<String, dynamic>
 Set<int>
-Set
-<
-double>
-
+Set<double>
 Set<num>
-Set
-<
-BigInt>
-
+Set<BigInt>
 Set<String>
-Set
-<
-bool>
-
+Set<bool>
 Object
 FileSystemEntity
-
 List<FileSystemEntity>
-Set
-<
-FileSystemEntity>
-
+Set<FileSystemEntity>
 Directory
-List
-<
-Directory>
-
+List<Directory>
 Set<Directory>
 File
-
 List<File>
-Set
-<
-File>
-
+Set<File>
 Link
-List
-<
-Link>Set<Link>
+List<Link>
+Set<Link>
 ```
 
 ### Custom Conversion Types
@@ -123,11 +82,5 @@ class IntConverter extends Converter<String, int> {
   }
 }
 
-ShellConversionConfig.add
-(
-const
-IntConverter
-(
-)
-);
+ShellConversionConfig.add(const IntConverter());
 ```

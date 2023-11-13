@@ -1,3 +1,7 @@
+## 0.3.0
+
+- Add file system converters
+
 ## 0.2.0
 
 - Add shellSync
