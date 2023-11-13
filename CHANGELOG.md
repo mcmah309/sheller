@@ -1,3 +1,7 @@
+## 0.3.4
+
+- Improve README
+
 ## 0.3.3
 
 - Improve doc

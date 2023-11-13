@@ -1,6 +1,6 @@
 name: sheller
-description: Convenience utilities for interacting with and converting shell output.
-version: 0.3.3
+description: Ergonomic utilities for interacting with shells and converting output. Useful for writing Dart scripts.
+version: 0.3.4
 repository: https://github.com/mcmah309/sheller
 
 environment:

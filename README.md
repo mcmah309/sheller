@@ -1,15 +1,23 @@
 # sheller
 
-Convenience utilities for interacting with and converting shell output. Useful for writing dart scripts.
+[![Pub Version](https://img.shields.io/pub/v/sheller.svg)](https://pub.dev/packages/sheller)
+[![Dart Package Docs](https://img.shields.io/badge/documentation-pub.dev-blue.svg)](https://pub.dev/documentation/sheller/latest/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 
-### Example
+Ergonomic utilities for interacting with shells and converting output. Useful for writing Dart scripts.
 
 ```dart
 
 List<File> files = shellSync("cd $outputDir && dart pub run index_generator && find . -maxdepth 1 -type f");
 ```
+### Table of Contents
 
-### More Examples
+1. [Examples](#examples)
+2. [Valid Conversion Types](#valid-conversion-types)
+3. [Custom Conversion Types](#custom-conversion-types)
+4. [Real Use Case - Protobuf Package Generation Script Example](#real-use-case---protobuf-package-generation-script-example)
+
+### Examples
 
 ```dart  
 // int async
@@ -83,4 +91,33 @@ class IntConverter extends Converter<String, int> {
 }
 
 ShellConversionConfig.add(const IntConverter());
+```
+
+### Real Use Case - Protobuf Package Generation Script Example
+```dart
+Future<void> main() async {
+  String osPathSeparator = path.separator;
+  validate(() => Directory.current.path.split(osPathSeparator).last == "lib");
+  var protoFilesDir = "../../../proto";
+  var outputDir = "../../generated";
+  var outputSrcDir = "../../generated/lib/src";
+  Directory(outputDir).deleteSync(recursive: true);
+  Directory(outputSrcDir).createSync(recursive: true);
+
+  var protoFiles = Directory(protoFilesDir)
+      .listSync()
+      .whereType<File>()
+      .where((file) => file.path.endsWith(".proto"))
+      .map((file) => file.path)
+      .toList();
+
+  var command = "protoc -I=$protoFilesDir --dart_out=grpc:$outputSrcDir ${protoFiles.join(' ')} google/protobuf/empty.proto";
+  print(shellSync(command));
+
+  var toCopyOver = "../to_copy_over";
+  Directory(toCopyOver).copyToSync(Directory(outputDir));
+
+  final generateBarrelFileCommand = "cd $outputDir && dart pub run index_generator";
+  print(shellSync(generateBarrelFileCommand));
+}
 ```
