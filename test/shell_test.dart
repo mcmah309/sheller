@@ -34,6 +34,6 @@ void main() {
 
   test('file system', () {
     final command = Platform.isWindows ? 'dir /b /ad' : 'ls -d */';
-    final List<FileSystemEntity> y = shellSync(command);
+    final List<FileSystemEntity> _ = shellSync(command);
   });
 }
