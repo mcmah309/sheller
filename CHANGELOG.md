@@ -1,3 +1,7 @@
+## 0.3.2
+
+- Improve error messages
+
 ## 0.3.1
 
 - Rename

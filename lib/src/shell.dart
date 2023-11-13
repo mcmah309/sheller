@@ -30,10 +30,11 @@ class Shell {
   late final String Function(ProcessResult) _processResultToString;
 
   Shell(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
+    final workingDirectory = shellConfig.workingDirectory ?? Directory.current.path;
     rawResult = Process.run(
       cmd,
       [],
-      workingDirectory: shellConfig.workingDirectory ?? Directory.current.path,
+      workingDirectory: workingDirectory,
       environment: shellConfig.environment,
       includeParentEnvironment: shellConfig.includeParentEnvironment,
       runInShell: shellConfig.runInShell,
@@ -42,7 +43,7 @@ class Shell {
     );
     _processResultToString = (ProcessResult e) {
       if (e.exitCode != 0) {
-        throw ShellException(e.exitCode, e.pid, e.stdout, e.stderr);
+        throw ShellException(cmd, workingDirectory, e.exitCode, e.pid, e.stdout, e.stderr);
       }
       String stringResult = (e.stdout as String);
       if (shellConfig.trimResult) {
@@ -90,10 +91,11 @@ class ShellSync {
   late final String Function(ProcessResult) _processResultToString;
 
   ShellSync(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
+    final workingDirectory = shellConfig.workingDirectory ?? Directory.current.path;
     rawResult = Process.runSync(
       cmd,
       [],
-      workingDirectory: shellConfig.workingDirectory ?? Directory.current.path,
+      workingDirectory: workingDirectory,
       environment: shellConfig.environment,
       includeParentEnvironment: shellConfig.includeParentEnvironment,
       runInShell: shellConfig.runInShell,
@@ -102,7 +104,7 @@ class ShellSync {
     );
     _processResultToString = (ProcessResult e) {
       if (e.exitCode != 0) {
-        throw ShellException(e.exitCode, e.pid, e.stdout, e.stderr);
+        throw ShellException(cmd, workingDirectory, e.exitCode, e.pid, e.stdout, e.stderr);
       }
       String stringResult = (e.stdout as String);
       if (shellConfig.trimResult) {
