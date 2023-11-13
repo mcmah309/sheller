@@ -11,21 +11,21 @@ List<Directory> files = shellSync("cd $outputDir && dart pub run index_generator
 
 ### More Examples
 
-```dart
+```dart  
 // int
-int y = await shell("echo 1");
-expect(y, 1);
+int number = await shell("echo 1");
+assert(number == 1);
 // json
 String data = '{"id":1, "name":"lorem ipsum", "address":"dolor set amet"}';
-Map<String, dynamic> w = await shell('echo $data');
-expect(w.entries.length, 3);
+Map<String, dynamic> json = await shell('echo $data');
+assert(json.entries.length == 3);
 // List<double>
-List<double> d = await shell('echo 1 2 3');
-expect(d.length, 3);
+List<double> doubleList = await shell('echo 1 2 3');
+assert(doubleList.length == 3);
 // Class version
 ShellSync shellClass = ShellSync("echo 1");
-int id = shell.rawResult.pid; // shell.rawResult.runtimeType == ProcessResult
-String stringResult = shell.stringResult; // == "1"
+int id = shellClass.rawResult.pid; // shell.rawResult.runtimeType == ProcessResult
+String stringResult = shellClass.stringResult; // == "1"
 int convertedResult = shellClass(); // == 1
 ```
 
