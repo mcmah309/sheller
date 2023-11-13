@@ -1,4 +1,6 @@
-import 'package:sheller/src/shell.dart';
+import 'dart:io';
+
+import 'package:sheller/sheller.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -28,5 +30,10 @@ void main() {
   test('sync', () {
     final int y = shellSync("echo 1");
     expect(y, 1);
+  });
+
+  test('file system', () {
+    final command = Platform.isWindows ? 'dir /b /ad' : 'ls -d */';
+    final List<FileSystemEntity> y = shellSync(command);
   });
 }
