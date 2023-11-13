@@ -6,21 +6,21 @@ Convenience utilities for interacting with and converting shell output. Useful f
 
 ```dart
 
-List<Directory> files = shellSync("cd $outputDir && dart pub run index_generator && ls -d */");
+List<File> files = shellSync("cd $outputDir && dart pub run index_generator && find . -maxdepth 1 -type f");
 ```
 
 ### More Examples
 
 ```dart  
-// int
+// int async
 int number = await shell("echo 1");
 assert(number == 1);
 // json
 String data = '{"id":1, "name":"lorem ipsum", "address":"dolor set amet"}';
-Map<String, dynamic> json = await shell('echo $data');
+Map<String, dynamic> json = shellSync('echo $data');
 assert(json.entries.length == 3);
 // List<double>
-List<double> doubleList = await shell('echo 1 2 3');
+List<double> doubleList = shellSync('echo 1 2 3');
 assert(doubleList.length == 3);
 // Class version
 ShellSync shellClass = ShellSync("echo 1");
