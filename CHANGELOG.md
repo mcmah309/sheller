@@ -1,3 +1,7 @@
+## 0.4.0-dev1
+
+- Redesign
+
 ## 0.3.4
 
 - Improve README
