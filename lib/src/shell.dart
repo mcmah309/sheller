@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'base_type_converters.dart';
 import 'exceptions.dart';
@@ -16,46 +17,64 @@ class $ {
   static final RegExp _spaces = RegExp(r' ');
 
 
-  late final Future<ProcessResult> rawResult;
+  /// Exit code of the process.
+  Future<int> get exitCode => _rawResult.then((value) => value.exitCode);
+  
+  /// Process id of the process.
+  Future<int> get pid => _rawResult.then((value) => value.pid);
+  
+  /// Raw stderr in bytes.
+  Future<Uint8List> get stderr => _rawResult.then((value) => value.stderr as Uint8List);
 
-  /// Returns the result as a [String]. Will throw a [ShellException] if the shell process did not exit with 0 as the
-  /// status code.
-  Future<String> get stringResult {
-    if (_stringResult != null) {
-      return _stringResult!;
+  /// stderr as a [String].
+  Future<String> get stderrAsString async {
+    if (_stderrString != null) {
+      return _stderrString!;
     }
-    _stringResult = rawResult.then(_processResultToString);
-    return _stringResult!;
+    final rawResult = await _rawResult;
+    _stderrString = const SystemEncoding().decode(rawResult.stderr);
+    return _stderrString!;
+  }
+  
+  /// Raw stdout in bytes.
+  Future<Uint8List> get stdout => _rawResult.then((value) => value.stdout as Uint8List);
+
+  /// stdout as a [String].
+  Future<String> get stdoutAsString async {
+    if (_stdoutString != null) {
+      return _stdoutString!;
+    }
+    final rawResult = await _rawResult;
+    _stdoutString = const SystemEncoding().decode(rawResult.stdout);
+    return _stdoutString!;
   }
 
-  // Lazily evaluated so the Shell will not throw unless the Result as a string is requested
-  Future<String>? _stringResult;
-  late final String Function(ProcessResult) _processResultToString;
+
+  late final Future<ProcessResult> _rawResult;
+  String? _stringResult;
+  String? _stderrString;
+  String? _stdoutString;
+  late final Future<String> Function(ProcessResult) _processResult;
 
   $(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
     final workingDirectory = shellConfig.workingDirectory ?? Directory.current.path;
     final executable = Platform.isLinux ? "/bin/sh" : cmd;
     final args = Platform.isLinux ? ["-c", "''${cmd.replaceAll("'", "\\'")}''"] : <String>[];
-    rawResult = Process.run(
+    _rawResult = Process.run(
       executable,
       args,
       workingDirectory: workingDirectory,
       environment: shellConfig.environment,
       includeParentEnvironment: shellConfig.includeParentEnvironment,
       runInShell: shellConfig.runInShell,
-      stdoutEncoding: shellConfig.stdoutEncoding,
-      stderrEncoding: shellConfig.stderrEncoding,
+      stdoutEncoding: null,
+      stderrEncoding: null,
     );
-    _processResultToString = (ProcessResult e) {
+    _processResult = (ProcessResult e) async {
       if (e.exitCode != 0) {
-        throw ShellException(
-            executable, args, workingDirectory, e.exitCode, e.pid, e.stdout, e.stderr);
+        throw ShellException(executable, args, workingDirectory, e.exitCode, e.pid, e.stdout, e.stderr);
       }
-      String stringResult = (e.stdout as String);
-      if (shellConfig.trimResult) {
-        stringResult = stringResult.trim();
-      }
-      return stringResult;
+      return (await stdoutAsString).trim();
     };
   }
 
@@ -63,8 +82,9 @@ class $ {
   /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
   /// type [T].
   Future<T> call<T extends Object>() async {
+    _stringResult ??= await _rawResult.then(_processResult);
     final converter = ShellConversionConfig.get<T>();
-    return converter.convert(await stringResult);
+    return converter.convert(_stringResult!);
   }
 
   /// Splits the output by spaces and converts each split into the desired type [T].
@@ -86,7 +106,8 @@ class $ {
   Future<List<T>>  whitespaces<T extends Object>() => _callWithRegExp<T>(_whitespaces);
 
   Future<List<T>>  _callWithRegExp<T extends Object>(RegExp splitter) async {
-    final splits = (await stringResult).split(splitter);
+    _stringResult ??= await _rawResult.then(_processResult);
+    final splits = _stringResult!.split(splitter);
     final converter = ShellConversionConfig.get<T>();
     return splits.map((e) => converter.convert(e)).toList();
   }
@@ -132,17 +153,11 @@ class ShellConfig {
   final Map<String, String>? environment;
   final bool includeParentEnvironment;
   final bool runInShell;
-  final Encoding stdoutEncoding;
-  final Encoding stderrEncoding;
-  final bool trimResult;
 
   const ShellConfig({
     this.workingDirectory,
     this.environment,
     this.includeParentEnvironment = true,
     this.runInShell = true,
-    this.stdoutEncoding = systemEncoding,
-    this.stderrEncoding = systemEncoding,
-    this.trimResult = true,
   });
 }

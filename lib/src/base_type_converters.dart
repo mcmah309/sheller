@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'exceptions.dart';
-import 'shell.dart';
 
 class IntConverter extends Converter<String, int> {
   const IntConverter();

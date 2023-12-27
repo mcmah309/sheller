@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 /// An [Exception] that happened inside the shell
 class ShellException implements Exception {
   final String executable;
@@ -5,27 +9,46 @@ class ShellException implements Exception {
   final String workingDirectory;
   final int exitCode;
   final int pid;
-  final String stdout;
-  final String stderr;
+  final Uint8List stdout;
+  final Uint8List stderr;
 
   ShellException(this.executable, this.args, this.workingDirectory, this.exitCode, this.pid, this.stdout, this.stderr);
 
   @override
   String toString() {
-    return """
-    ShellException: The shell process with PID $pid failed with
-    
-    Executable: $executable
+    String std;
+    try {
+      std = """
+  stdout sytem encoding: ${const SystemEncoding().decode(stdout)}
 
-    Arguments: $args
-    
-    Working directory at start of command: $workingDirectory
-    
-    Exit code: $exitCode
-    
-    stdout: $stdout
-    
-    stderr: $stderr
+  stderr system encoding: ${const SystemEncoding().decode(stderr)}
+
+  stdout bytes: $stdout
+
+  stderr bytes: $stderr
+            """;
+    } catch (e) {
+      std = """
+  stdout bytes: $stdout
+
+  stderr bytes: $stderr
+      """;
+    }
+
+    return """
+ShellException: The shell process failed.
+
+  PID: $pid
+
+  Executable: $executable
+
+  Arguments: $args
+
+  Working directory at start: $workingDirectory
+
+  Exit code: $exitCode
+
+$std
     """;
   }
 }

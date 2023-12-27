@@ -6,9 +6,8 @@ import 'package:test/test.dart';
 void main() {
   test('Shell lazily throws error', () async {
     final shell = $("exit 1");
-    await shell.rawResult;
     await Future.delayed(Duration(seconds: 1));
-    expect(() async => await shell.stringResult, throwsA(isA<ShellException>()));
+    expect(() async => await shell(), throwsA(isA<ShellException>()));
   });
 
   test('int', () async {

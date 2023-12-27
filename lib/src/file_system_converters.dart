@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'exceptions.dart';
-import 'shell.dart';
 
 class FileSystemEntityConverter extends Converter<String, FileSystemEntity> {
   const FileSystemEntityConverter();

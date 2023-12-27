@@ -17,6 +17,6 @@ void main() async {
   assert(doubleList.length == 3);
   // Class version
   $ shellClass = $("echo 1");
-  int id = (await shellClass.rawResult).pid;
+  int id = await shellClass.pid;
   int convertedResult = await shellClass(); // == 1
 }

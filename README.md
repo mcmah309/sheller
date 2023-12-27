@@ -34,7 +34,7 @@ void main() async {
   assert(doubleList.length == 3);
   // Class version
   $ shellClass = $("echo 1");
-  int id = (await shellClass.rawResult).pid;
+  int id = await shellClass.pid;
   int convertedResult = await shellClass(); // == 1
 }
 ```
@@ -80,7 +80,7 @@ ShellConversionConfig.add(const IntConverter());
 ```dart
 Future<void> main() async {
   String osPathSeparator = path.separator;
-  validate(() => Directory.current.path.split(osPathSeparator).last == "lib");
+  assert(Directory.current.path.split(osPathSeparator).last == "lib");
   var protoFilesDir = "../../../proto";
   var outputDir = "../../generated";
   var outputSrcDir = "../../generated/lib/src";
