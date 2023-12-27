@@ -8,7 +8,7 @@ Ergonomic utilities for interacting with shells and converting output. Useful fo
 
 ```dart
 
-List<File> files = shellSync("cd $outputDir && dart pub run index_generator && find . -maxdepth 1 -type f");
+List<File> files = await $("cd $outputDir && dart pub run index_generator && find . -maxdepth 1 -type f").byNewLines();
 ```
 ### Table of Contents
 
@@ -20,21 +20,23 @@ List<File> files = shellSync("cd $outputDir && dart pub run index_generator && f
 ### Examples
 
 ```dart  
-// int async
-int number = await shell("echo 1");
-assert(number == 1);
-// json
-String data = '{"id":1, "name":"lorem ipsum", "address":"dolor set amet"}';
-Map<String, dynamic> json = shellSync('echo $data');
-assert(json.entries.length == 3);
-// List<double>
-List<double> doubleList = shellSync('echo 1 2 3');
-assert(doubleList.length == 3);
-// Class version
-ShellSync shellClass = ShellSync("echo 1");
-int id = shellClass.rawResult.pid; // shell.rawResult.runtimeType == ProcessResult
-String stringResult = shellClass.stringResult; // == "1"
-int convertedResult = shellClass(); // == 1
+// Linux
+void main() async {
+  // int
+  int number = await $("echo 1")();
+  assert(number == 1);
+  // json
+  String data ='{\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}';
+  Map<String, dynamic> json = await $('echo $data')();
+  assert(json.entries.length == 3);
+  // List<double>
+  List<double> doubleList = await $('echo 1 2 3')();
+  assert(doubleList.length == 3);
+  // Class version
+  $ shellClass = $("echo 1");
+  int id = (await shellClass.rawResult).pid;
+  int convertedResult = await shellClass(); // == 1
+}
 ```
 
 ### Valid Conversion Types
@@ -46,33 +48,14 @@ num
 BigInt
 String
 bool
-List<String>
-List<int>
-List<double>
-List<num>
-List<BigInt>
-List<bool>
 Map<String, dynamic>
-Set<int>
-Set<double>
-Set<num>
-Set<BigInt>
-Set<String>
-Set<bool>
 Object
 FileSystemEntity
-List<FileSystemEntity>
-Set<FileSystemEntity>
 Directory
-List<Directory>
-Set<Directory>
 File
-List<File>
-Set<File>
 Link
-List<Link>
-Set<Link>
 ```
+As well as their `List` variants.
 
 ### Custom Conversion Types
 
@@ -112,12 +95,12 @@ Future<void> main() async {
       .toList();
 
   var command = "protoc -I=$protoFilesDir --dart_out=grpc:$outputSrcDir ${protoFiles.join(' ')} google/protobuf/empty.proto";
-  print(shellSync(command));
+  print(await $(command)());
 
   var toCopyOver = "../to_copy_over";
   Directory(toCopyOver).copyToSync(Directory(outputDir));
 
   final generateBarrelFileCommand = "cd $outputDir && dart pub run index_generator";
-  print(shellSync(generateBarrelFileCommand));
+  print(await $(generateBarrelFileCommand)());
 }
 ```

@@ -65,68 +65,7 @@ class BoolConverter extends Converter<String, bool> {
 
   @override
   bool convert(String input) {
-    if (input.toLowerCase() == 'true') {
-      return true;
-    } else if (input.toLowerCase() == 'false') {
-      return false;
-    }
-    throw ShellResultConversionException(bool, input);
-  }
-}
-
-//************************************************************************//
-
-class ListStringConverter extends Converter<String, List<String>> {
-  const ListStringConverter();
-
-  @override
-  List<String> convert(String input) {
-    return input.split(ShellConversionConfig.splitter);
-  }
-}
-
-class ListIntConverter extends Converter<String, List<int>> {
-  const ListIntConverter();
-
-  @override
-  List<int> convert(String input) {
-    return input.split(ShellConversionConfig.splitter).map((e) => const IntConverter().convert(e)).toList();
-  }
-}
-
-class ListDoubleConverter extends Converter<String, List<double>> {
-  const ListDoubleConverter();
-
-  @override
-  List<double> convert(String input) {
-    return input.split(ShellConversionConfig.splitter).map((e) => const DoubleConverter().convert(e)).toList();
-  }
-}
-
-class ListNumConverter extends Converter<String, List<num>> {
-  const ListNumConverter();
-
-  @override
-  List<num> convert(String input) {
-    return input.split(ShellConversionConfig.splitter).map((e) => const NumConverter().convert(e)).toList();
-  }
-}
-
-class ListBigIntConverter extends Converter<String, List<BigInt>> {
-  const ListBigIntConverter();
-
-  @override
-  List<BigInt> convert(String input) {
-    return input.split(ShellConversionConfig.splitter).map((e) => const BigIntConverter().convert(e)).toList();
-  }
-}
-
-class ListBoolConverter extends Converter<String, List<bool>> {
-  const ListBoolConverter();
-
-  @override
-  List<bool> convert(String input) {
-    return input.split(ShellConversionConfig.splitter).map((e) => const BoolConverter().convert(e)).toList();
+    return input.isNotEmpty;
   }
 }
 
@@ -146,61 +85,5 @@ class JsonConverter extends Converter<String, Map<String, dynamic>> {
         throw ShellResultConversionException(Map<String, dynamic>, input);
       }
     }
-  }
-}
-
-//************************************************************************//
-
-class SetStringConverter extends Converter<String, Set<String>> {
-  const SetStringConverter();
-
-  @override
-  Set<String> convert(String input) {
-    return input.split(ShellConversionConfig.splitter).toSet();
-  }
-}
-
-class SetIntConverter extends Converter<String, Set<int>> {
-  const SetIntConverter();
-
-  @override
-  Set<int> convert(String input) {
-    return input.split(ShellConversionConfig.splitter).map((e) => const IntConverter().convert(e)).toSet();
-  }
-}
-
-class SetDoubleConverter extends Converter<String, Set<double>> {
-  const SetDoubleConverter();
-
-  @override
-  Set<double> convert(String input) {
-    return input.split(ShellConversionConfig.splitter).map((e) => const DoubleConverter().convert(e)).toSet();
-  }
-}
-
-class SetNumConverter extends Converter<String, Set<num>> {
-  const SetNumConverter();
-
-  @override
-  Set<num> convert(String input) {
-    return input.split(ShellConversionConfig.splitter).map((e) => const NumConverter().convert(e)).toSet();
-  }
-}
-
-class SetBigIntConverter extends Converter<String, Set<BigInt>> {
-  const SetBigIntConverter();
-
-  @override
-  Set<BigInt> convert(String input) {
-    return input.split(ShellConversionConfig.splitter).map((e) => const BigIntConverter().convert(e)).toSet();
-  }
-}
-
-class SetBoolConverter extends Converter<String, Set<bool>> {
-  const SetBoolConverter();
-
-  @override
-  Set<bool> convert(String input) {
-    return input.split(ShellConversionConfig.splitter).map((e) => const BoolConverter().convert(e)).toSet();
   }
 }

@@ -5,14 +5,17 @@ import 'base_type_converters.dart';
 import 'exceptions.dart';
 import 'file_system_converters.dart';
 
-/// Convenience function for executing a shell and converting the result to a dart type
-Future<T> shell<T extends Object>(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
-  return Shell(cmd, shellConfig)();
-}
+
+//************************************************************************//
 
 /// Wrapper around [Process.run] that makes running a shell and converting the result back into a dart type more
 /// convenient
-class Shell {
+class $ {
+  static final RegExp _newLines = RegExp(r'\r?\n');
+  static final RegExp _whitespaces = RegExp(r'\s+');
+  static final RegExp _spaces = RegExp(r' ');
+
+
   late final Future<ProcessResult> rawResult;
 
   /// Returns the result as a [String]. Will throw a [ShellException] if the shell process did not exit with 0 as the
@@ -29,11 +32,13 @@ class Shell {
   Future<String>? _stringResult;
   late final String Function(ProcessResult) _processResultToString;
 
-  Shell(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
+  $(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
     final workingDirectory = shellConfig.workingDirectory ?? Directory.current.path;
+    final executable = Platform.isLinux ? "/bin/sh" : cmd;
+    final args = Platform.isLinux ? ["-c", "''${cmd.replaceAll("'", "\\'")}''"] : <String>[];
     rawResult = Process.run(
-      cmd,
-      [],
+      executable,
+      args,
       workingDirectory: workingDirectory,
       environment: shellConfig.environment,
       includeParentEnvironment: shellConfig.includeParentEnvironment,
@@ -43,7 +48,8 @@ class Shell {
     );
     _processResultToString = (ProcessResult e) {
       if (e.exitCode != 0) {
-        throw ShellException(cmd, workingDirectory, e.exitCode, e.pid, e.stdout, e.stderr);
+        throw ShellException(
+            executable, args, workingDirectory, e.exitCode, e.pid, e.stdout, e.stderr);
       }
       String stringResult = (e.stdout as String);
       if (shellConfig.trimResult) {
@@ -56,70 +62,33 @@ class Shell {
   /// Converts the shell result into the desired type [T]. Will throw a [ShellException] if the shell process did not
   /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
   /// type [T].
-  Future<T> call<T extends Object>() {
-    return stringResult.then((s) {
-      final converter = ShellConversionConfig.get<T>();
-      return converter.convert(s);
-    });
-  }
-}
-
-//************************************************************************//
-
-/// Convenience function for executing a shell and converting the result to a dart type
-T shellSync<T extends Object>(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
-  return ShellSync(cmd, shellConfig)();
-}
-
-/// Wrapper around [Process.runSync] that makes running a shell and converting the result back into a dart type more
-/// convenient
-class ShellSync {
-  late final ProcessResult rawResult;
-
-  /// Returns the result as a [String]. Will throw a [ShellException] if the shell process did not exit with 0 as the
-  /// status code.
-  String get stringResult {
-    if (_stringResult != null) {
-      return _stringResult!;
-    }
-    _stringResult = _processResultToString(rawResult);
-    return _stringResult!;
-  }
-
-  // Lazily evaluated so the Shell will not throw unless the Result as a string is requested
-  String? _stringResult;
-  late final String Function(ProcessResult) _processResultToString;
-
-  ShellSync(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
-    final workingDirectory = shellConfig.workingDirectory ?? Directory.current.path;
-    rawResult = Process.runSync(
-      cmd,
-      [],
-      workingDirectory: workingDirectory,
-      environment: shellConfig.environment,
-      includeParentEnvironment: shellConfig.includeParentEnvironment,
-      runInShell: shellConfig.runInShell,
-      stdoutEncoding: shellConfig.stdoutEncoding,
-      stderrEncoding: shellConfig.stderrEncoding,
-    );
-    _processResultToString = (ProcessResult e) {
-      if (e.exitCode != 0) {
-        throw ShellException(cmd, workingDirectory, e.exitCode, e.pid, e.stdout, e.stderr);
-      }
-      String stringResult = (e.stdout as String);
-      if (shellConfig.trimResult) {
-        stringResult = stringResult.trim();
-      }
-      return stringResult;
-    };
-  }
-
-  /// Converts the shell result into the desired type [T]. Will throw a [ShellException] if the shell process did not
-  /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
-  /// type [T].
-  T call<T extends Object>() {
+  Future<T> call<T extends Object>([String? splitBy]) async {
     final converter = ShellConversionConfig.get<T>();
-    return converter.convert(stringResult);
+    return converter.convert(await stringResult);
+  }
+
+  /// Splits the output by spaces and converts each split into the desired type [T].
+  /// Will throw a [ShellException] if the shell process did not
+  /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
+  /// type [T].
+  Future<List<T>> bySpaces<T extends Object>() => _callWithRegExp<T>(_spaces);
+
+  /// Splits the output by newlines and converts each split into the desired type [T].
+  /// Will throw a [ShellException] if the shell process did not
+  /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
+  /// type [T].
+  Future<List<T>>  byNewlines<T extends Object>() => _callWithRegExp<T>(_newLines);
+
+  /// Splits the output by whitespaces and converts each split into the desired type [T].
+  /// Will throw a [ShellException] if the shell process did not
+  /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
+  /// type [T].
+  Future<List<T>>  byWhitespaces<T extends Object>() => _callWithRegExp<T>(_whitespaces);
+
+  Future<List<T>>  _callWithRegExp<T extends Object>(RegExp splitter) async {
+    final splits = (await stringResult).split(splitter);
+    final converter = ShellConversionConfig.get<T>();
+    return splits.map((e) => converter.convert(e)).toList();
   }
 }
 
@@ -127,12 +96,6 @@ class ShellSync {
 
 /// Configuration for conversions between shell results and dart types. Can be modified at runtime.
 class ShellConversionConfig {
-  /// regex splitter used by List and Set converters. Splits by whitespace. Consider changing to
-  /// ```
-  /// RegExp(r'\r?\n')
-  /// ```
-  /// If you prefer just newlines
-  static RegExp splitter = RegExp(r'\s+');
   static final Map<Object, Converter<String, Object>> _map = {
     int: const IntConverter(),
     double: const DoubleConverter(),
@@ -140,32 +103,12 @@ class ShellConversionConfig {
     BigInt: const BigIntConverter(),
     String: const StringConverter(),
     bool: const BoolConverter(),
-    List<String>: const ListStringConverter(),
-    List<int>: const ListIntConverter(),
-    List<double>: const ListDoubleConverter(),
-    List<num>: const ListNumConverter(),
-    List<BigInt>: const ListBigIntConverter(),
-    List<bool>: const ListBoolConverter(),
-    Map<String, dynamic>: JsonConverter(),
-    Set<int>: const SetIntConverter(),
-    Set<double>: const SetDoubleConverter(),
-    Set<num>: const SetNumConverter(),
-    Set<BigInt>: const SetBigIntConverter(),
-    Set<String>: const SetStringConverter(),
-    Set<bool>: const SetBoolConverter(),
     Object: const StringConverter(),
+    Map<String, dynamic>: JsonConverter(),
     FileSystemEntity: const FileSystemEntityConverter(),
-    List<FileSystemEntity>: const ListFileSystemEntityConverter(),
-    Set<FileSystemEntity>: const SetFileSystemEntityConverter(),
     Directory: const DirectoryConverter(),
-    List<Directory>: const ListDirectoryConverter(),
-    Set<Directory>: const SetDirectoryConverter(),
     File: const FileConverter(),
-    List<File>: const ListFileConverter(),
-    Set<File>: const SetFileConverter(),
     Link: const LinkConverter(),
-    List<Link>: const ListLinkConverter(),
-    Set<Link>: const SetLinkConverter(),
   };
 
   static void add<T extends Object>(Converter<String, T> value) {
@@ -173,7 +116,8 @@ class ShellConversionConfig {
   }
 
   static Converter<String, T> get<T extends Object>() {
-    assert(_map.containsKey(T), "ShellConversionMap does not contain a converter for ${T.toString()}");
+    assert(_map.containsKey(T),
+        "ShellConversionMap does not contain a converter for ${T.toString()}");
     return _map[T] as Converter<String, T>;
   }
 

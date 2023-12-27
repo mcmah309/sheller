@@ -1,20 +1,23 @@
 /// An [Exception] that happened inside the shell
 class ShellException implements Exception {
-  final String originalCmd;
+  final String executable;
+  final List<String> args;
   final String workingDirectory;
   final int exitCode;
   final int pid;
   final String stdout;
   final String stderr;
 
-  ShellException(this.originalCmd, this.workingDirectory, this.exitCode, this.pid, this.stdout, this.stderr);
+  ShellException(this.executable, this.args, this.workingDirectory, this.exitCode, this.pid, this.stdout, this.stderr);
 
   @override
   String toString() {
     return """
     ShellException: The shell process with PID $pid failed with
     
-    Original command: $originalCmd
+    Executable: $executable
+
+    Arguments: $args
     
     Working directory at start of command: $workingDirectory
     
