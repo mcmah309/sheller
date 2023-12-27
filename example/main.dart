@@ -13,7 +13,7 @@ void main() async {
   Map<String, dynamic> json = await $('echo $data')();
   assert(json.entries.length == 3);
   // List<double>
-  List<double> doubleList = await $('echo 1 2 3')();
+  List<double> doubleList = await $('echo 1 2 3').spaces();
   assert(doubleList.length == 3);
   // Class version
   $ shellClass = $("echo 1");

@@ -62,7 +62,7 @@ class $ {
   /// Converts the shell result into the desired type [T]. Will throw a [ShellException] if the shell process did not
   /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
   /// type [T].
-  Future<T> call<T extends Object>([String? splitBy]) async {
+  Future<T> call<T extends Object>() async {
     final converter = ShellConversionConfig.get<T>();
     return converter.convert(await stringResult);
   }
@@ -71,19 +71,19 @@ class $ {
   /// Will throw a [ShellException] if the shell process did not
   /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
   /// type [T].
-  Future<List<T>> bySpaces<T extends Object>() => _callWithRegExp<T>(_spaces);
+  Future<List<T>> spaces<T extends Object>() => _callWithRegExp<T>(_spaces);
 
   /// Splits the output by newlines and converts each split into the desired type [T].
   /// Will throw a [ShellException] if the shell process did not
   /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
   /// type [T].
-  Future<List<T>>  byNewlines<T extends Object>() => _callWithRegExp<T>(_newLines);
+  Future<List<T>>  lines<T extends Object>() => _callWithRegExp<T>(_newLines);
 
   /// Splits the output by whitespaces and converts each split into the desired type [T].
   /// Will throw a [ShellException] if the shell process did not
   /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
   /// type [T].
-  Future<List<T>>  byWhitespaces<T extends Object>() => _callWithRegExp<T>(_whitespaces);
+  Future<List<T>>  whitespaces<T extends Object>() => _callWithRegExp<T>(_whitespaces);
 
   Future<List<T>>  _callWithRegExp<T extends Object>(RegExp splitter) async {
     final splits = (await stringResult).split(splitter);

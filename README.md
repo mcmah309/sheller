@@ -8,7 +8,7 @@ Ergonomic utilities for interacting with shells and converting output. Useful fo
 
 ```dart
 
-List<File> files = await $("cd $outputDir && dart pub run index_generator && find . -maxdepth 1 -type f").byNewLines();
+List<File> files = await $("cd $outputDir && dart pub run index_generator && find . -maxdepth 1 -type f").lines();
 ```
 ### Table of Contents
 
@@ -30,7 +30,7 @@ void main() async {
   Map<String, dynamic> json = await $('echo $data')();
   assert(json.entries.length == 3);
   // List<double>
-  List<double> doubleList = await $('echo 1 2 3')();
+  List<double> doubleList = await $('echo 1 2 3').spaces();
   assert(doubleList.length == 3);
   // Class version
   $ shellClass = $("echo 1");

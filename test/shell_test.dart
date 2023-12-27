@@ -23,12 +23,12 @@ void main() {
   });
 
   test('List<double>', () async {
-    final List<double> d = await $('echo 1 2 3').bySpaces();
+    final List<double> d = await $('echo 1 2   3').spaces();
     expect(d.length, 3);
   });
 
   test('file system', () async {
     final command = Platform.isWindows ? 'dir /b /ad' : 'find "\$(pwd)" -maxdepth 1 -type d';
-    final List<FileSystemEntity> _ = await $(command).byNewlines();
+    final List<FileSystemEntity> _ = await $(command).lines();
   });
 }
