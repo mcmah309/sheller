@@ -33,7 +33,9 @@ class NumConverter extends Converter<String, num> {
 
   @override
   num convert(String input) {
-    return int.tryParse(input) ?? double.tryParse(input) ?? (throw ShellResultConversionException(num, input));
+    return int.tryParse(input) ??
+        double.tryParse(input) ??
+        (throw ShellResultConversionException(num, input));
   }
 }
 

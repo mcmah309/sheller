@@ -4,7 +4,6 @@ import 'package:sheller/sheller.dart';
 import 'package:test/test.dart';
 
 void main() {
-
   test('Shell lazily throws error', () async {
     final shell = $("exit 1");
     await Future.delayed(Duration(seconds: 1));
@@ -17,7 +16,9 @@ void main() {
   });
 
   test('json', () async {
-    String data = Platform.isWindows ? '{"id":1, "name":"lorem ipsum", "address":"dolor set amet"}' : '{\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}';
+    String data = Platform.isWindows
+        ? '{"id":1, "name":"lorem ipsum", "address":"dolor set amet"}'
+        : '{\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}';
     final Map<String, dynamic> w = await $('echo $data')();
     expect(w.entries.length, 3);
   });
@@ -28,7 +29,9 @@ void main() {
   });
 
   test('file system', () async {
-    final command = Platform.isWindows ? 'dir /b /ad' : 'find "\$(pwd)" -maxdepth 1 -type d';
+    final command = Platform.isWindows
+        ? 'dir /b /ad'
+        : 'find "\$(pwd)" -maxdepth 1 -type d';
     final List<FileSystemEntity> _ = await $(command).lines();
   });
 

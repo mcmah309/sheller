@@ -9,7 +9,9 @@ void main() async {
   int number = await $("echo 1")();
   assert(number == 1);
   // json
-  String data = Platform.isWindows ? '{"id":1, "name":"lorem ipsum", "address":"dolor set amet"}' : '{\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}';
+  String data = Platform.isWindows
+      ? '{"id":1, "name":"lorem ipsum", "address":"dolor set amet"}'
+      : '{\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}';
   Map<String, dynamic> json = await $('echo $data')();
   assert(json.entries.length == 3);
   // List<double>
