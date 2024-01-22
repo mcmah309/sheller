@@ -89,9 +89,8 @@ class $ {
   /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
   /// type [T].
   Future<T> call<T extends Object>() async {
-    _stringResult ??= await _rawResult.then(_processResult);
     final converter = ShellConversionConfig.get<T>();
-    return converter.convert(_stringResult!);
+    return converter.convert(await text());
   }
 
   /// Returns the shells stdout. Will throw a [ShellException] if the shell process did not
@@ -120,7 +119,7 @@ class $ {
   Future<List<T>>  whitespaces<T extends Object>() => _callWithRegExp<T>(_whitespaces);
 
   Future<List<T>>  _callWithRegExp<T extends Object>(RegExp splitter) async {
-    final splits = await text().then((e) => e.split(splitter));
+    final splits = await text().then((e) => e.split(splitter).where((e) => e.isNotEmpty));
     final converter = ShellConversionConfig.get<T>();
     return splits.map((e) => converter.convert(e)).toList();
   }

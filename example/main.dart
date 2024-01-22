@@ -18,9 +18,10 @@ void main() async {
   // Class version
   $ shellClass = $("echo 1");
   int id = await shellClass.pid;
-  int convertedResult = await shellClass(); // == 1
+  int convertedResult = await shellClass();
+  assert(convertedResult == 1);
   // Writing to a file
-  await ($("echo 1") > File("./temp"));
+  await ($("echo 1") > File("./temp")); // == await $("echo 1 > ./temp")();
   // Appending to a file
-  await ($("echo 2") >> File("./temp"));
+  await ($("echo 2") >> File("./temp")); // == await $("echo 2 >> ./temp")();
 }

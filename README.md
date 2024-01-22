@@ -7,8 +7,7 @@
 Ergonomic utilities for interacting with shells and converting output. Useful for writing Dart scripts.
 
 ```dart
-
-List<File> files = await $("cd $outputDir && dart pub run index_generator && find . -maxdepth 1 -type f").lines();
+List<File> files = await $("cd $dir && find . -maxdepth 1 -type f").lines();
 ```
 ### Table of Contents
 
@@ -32,14 +31,15 @@ void main() async {
   // List<double>
   List<double> doubleList = await $('echo 1 2 3').spaces();
   assert(doubleList.length == 3);
-  // Class version
+  // The class
   $ shellClass = $("echo 1");
   int id = await shellClass.pid;
-  int convertedResult = await shellClass(); // == 1
+  int convertedResult = await shellClass();
+  assert(convertedResult == 1);
   // Writing to a file
-  await ($("echo 1") > File("./temp"));
+  await ($("echo 1") > File("./temp")); // == await $("echo 1 > ./temp")();
   // Appending to a file
-  await ($("echo 2") >> File("./temp"));
+  await ($("echo 2") >> File("./temp")); // == await $("echo 2 >> ./temp")();
 }
 ```
 

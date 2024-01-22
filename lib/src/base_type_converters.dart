@@ -7,7 +7,7 @@ class IntConverter extends Converter<String, int> {
 
   @override
   int convert(String input) {
-    int? result = int.tryParse(input.trim());
+    int? result = int.tryParse(input);
     if (result == null) {
       throw ShellResultConversionException(int, input);
     }
@@ -20,7 +20,7 @@ class DoubleConverter extends Converter<String, double> {
 
   @override
   double convert(String input) {
-    double? result = double.tryParse(input.trim());
+    double? result = double.tryParse(input);
     if (result == null) {
       throw ShellResultConversionException(double, input);
     }
@@ -33,8 +33,7 @@ class NumConverter extends Converter<String, num> {
 
   @override
   num convert(String input) {
-    final trimmed = input.trim();
-    return int.tryParse(trimmed) ?? double.tryParse(trimmed) ?? (throw ShellResultConversionException(num, input));
+    return int.tryParse(input) ?? double.tryParse(input) ?? (throw ShellResultConversionException(num, input));
   }
 }
 
@@ -44,7 +43,7 @@ class BigIntConverter extends Converter<String, BigInt> {
   @override
   BigInt convert(String input) {
     try {
-      return BigInt.parse(input.trim());
+      return BigInt.parse(input);
     } catch (e) {
       throw ShellResultConversionException(BigInt, input);
     }
@@ -76,12 +75,11 @@ class JsonConverter extends Converter<String, Map<String, dynamic>> {
 
   @override
   Map<String, dynamic> convert(String input) {
-    final trimmed = input.trim();
     try {
-      return json.decode(trimmed);
+      return json.decode(input);
     } catch (e1) {
       try {
-        return json.decode(trimmed.replaceAll("\\", ""));
+        return json.decode(input.replaceAll("\\", ""));
       } catch (e2) {
         throw ShellResultConversionException(Map<String, dynamic>, input);
       }
