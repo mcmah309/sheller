@@ -1,0 +1,21 @@
+{
+	"name": "flutter_dev",
+	"image": "flutter_dev",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"dart-code.flutter"
+			]
+		}
+	},
+	"mounts": [
+		// flutter
+		"source=/home/henry/.local/share/containers/storage/volumes/flutter_dev/_data/root/.pub-cache,target=/root/.pub-cache,type=bind",
+		// ssh
+		"source=/home/henry/.ssh/,target=/root/.ssh,type=bind",
+	],
+	"runArgs": [
+		"--net=host"
+	],
+	"remoteUser": "root"
+}
