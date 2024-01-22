@@ -19,4 +19,8 @@ void main() async {
   $ shellClass = $("echo 1");
   int id = await shellClass.pid;
   int convertedResult = await shellClass(); // == 1
+  // Writing to a file
+  await ($("echo 1") > File("./temp"));
+  // Appending to a file
+  await ($("echo 2") >> File("./temp"));
 }

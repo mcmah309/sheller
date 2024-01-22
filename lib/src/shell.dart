@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'base_type_converters.dart';
@@ -32,35 +32,36 @@ class $ {
       return _stderrString!;
     }
     final rawResult = await _rawResult;
-    _stderrString = const SystemEncoding().decode(rawResult.stderr);
+    _stderrString = const io.SystemEncoding().decode(rawResult.stderr);
     return _stderrString!;
   }
   
   /// Raw stdout in bytes.
   Future<Uint8List> get stdout => _rawResult.then((value) => value.stdout as Uint8List);
 
-  /// stdout as a [String].
+  /// stdout as a [String]. Prefer [text] if you need to check the exit code.
   Future<String> get stdoutAsString async {
     if (_stdoutString != null) {
       return _stdoutString!;
     }
     final rawResult = await _rawResult;
-    _stdoutString = const SystemEncoding().decode(rawResult.stdout);
+    _stdoutString = const io.SystemEncoding().decode(rawResult.stdout);
     return _stdoutString!;
   }
 
 
-  late final Future<ProcessResult> _rawResult;
+  late final Future<io.ProcessResult> _rawResult;
   String? _stringResult;
   String? _stderrString;
   String? _stdoutString;
-  late final Future<String> Function(ProcessResult) _processResult;
+  late final Future<String> Function(io.ProcessResult) _processResult;
+
 
   $(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
-    final workingDirectory = shellConfig.workingDirectory ?? Directory.current.path;
-    final executable = Platform.isLinux ? "/bin/sh" : cmd;
-    final args = Platform.isLinux ? ["-c", "''${cmd.replaceAll("'", "\\'")}''"] : <String>[];
-    _rawResult = Process.run(
+    final workingDirectory = shellConfig.workingDirectory ?? io.Directory.current.path;
+    final executable = io.Platform.isLinux ? "/bin/sh" : cmd;
+    final args = io.Platform.isLinux ? ["-c", "''${cmd.replaceAll("'", "\\'")}''"] : <String>[];
+    _rawResult = io.Process.run(
       executable,
       args,
       workingDirectory: workingDirectory,
@@ -70,21 +71,34 @@ class $ {
       stdoutEncoding: null,
       stderrEncoding: null,
     );
-    _processResult = (ProcessResult e) async {
+    _processResult = (io.ProcessResult e) async {
       if (e.exitCode != 0) {
         throw ShellException(executable, args, workingDirectory, e.exitCode, e.pid, e.stdout, e.stderr);
       }
-      return (await stdoutAsString).trim();
+      return stdoutAsString;
     };
   }
 
-  /// Converts the shell result into the desired type [T]. Will throw a [ShellException] if the shell process did not
+  /// True if the shell process exited with 0 as the exit code.
+  Future<bool> isSuccess() async {
+    return await exitCode == 0;
+  }
+
+  /// Converts into the desired type [T].
+  /// Will throw a [ShellException] if the shell process did not
   /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
   /// type [T].
   Future<T> call<T extends Object>() async {
     _stringResult ??= await _rawResult.then(_processResult);
     final converter = ShellConversionConfig.get<T>();
     return converter.convert(_stringResult!);
+  }
+
+  /// Returns the shells stdout. Will throw a [ShellException] if the shell process did not
+  /// exit with 0 as the status code.
+  Future<String> text() async {
+    _stringResult ??= await _rawResult.then(_processResult);
+    return _stringResult!;
   }
 
   /// Splits the output by spaces and converts each split into the desired type [T].
@@ -106,11 +120,20 @@ class $ {
   Future<List<T>>  whitespaces<T extends Object>() => _callWithRegExp<T>(_whitespaces);
 
   Future<List<T>>  _callWithRegExp<T extends Object>(RegExp splitter) async {
-    _stringResult ??= await _rawResult.then(_processResult);
-    final splits = _stringResult!.split(splitter);
+    final splits = await text().then((e) => e.split(splitter));
     final converter = ShellConversionConfig.get<T>();
     return splits.map((e) => converter.convert(e)).toList();
   }
+
+
+  Future<void> operator > (io.File file) async {
+    await file.writeAsBytes(await stdout, mode: io.FileMode.writeOnly, flush: true);
+  }
+
+  Future<void> operator >> (io.File file) async {
+    await file.writeAsBytes(await stdout, mode: io.FileMode.writeOnlyAppend, flush: true);
+  }
+
 }
 
 //************************************************************************//
@@ -126,10 +149,10 @@ class ShellConversionConfig {
     bool: const BoolConverter(),
     Object: const StringConverter(),
     Map<String, dynamic>: JsonConverter(),
-    FileSystemEntity: const FileSystemEntityConverter(),
-    Directory: const DirectoryConverter(),
-    File: const FileConverter(),
-    Link: const LinkConverter(),
+    io.FileSystemEntity: const FileSystemEntityConverter(),
+    io.Directory: const DirectoryConverter(),
+    io.File: const FileConverter(),
+    io.Link: const LinkConverter(),
   };
 
   static void add<T extends Object>(Converter<String, T> value) {
