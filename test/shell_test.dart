@@ -45,7 +45,7 @@ void main() {
     expect(File("./temp2").readAsLinesSync(), ["2", "4"]);
   });
 
-  test('Scho empty', () async {
+  test('Echo empty', () async {
     final command = 'echo ""';
     final String x = await $(command)();
     expect(x, "");

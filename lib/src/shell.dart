@@ -19,7 +19,9 @@ class $ {
   static final RegExp _trailingNewLine = RegExp(r'[\r?\n]$');
 
   /// Exit code of the process.
-  Future<int> get exitCode => _rawResult.then((value) => value.exitCode);
+  Future<int> get exitCode { 
+    return _rawResult.then((value) => value.exitCode);
+  }
 
   /// Process id of the process.
   Future<int> get pid => _rawResult.then((value) => value.pid);
@@ -84,14 +86,9 @@ class $ {
     };
   }
 
-  /// True if the shell process exited with 0 as the exit code.
-  Future<bool> isSuccess() async {
-    return await exitCode == 0;
-  }
-
   /// Converts into the desired type [T].
   /// Will throw a [ShellException] if the shell process did not
-  /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
+  /// exit with 0 as the exit code. Will throw a [ShellResultConversionException] if cannot convert to the desired
   /// type [T].
   Future<T> call<T extends Object>() async {
     final converter = ShellConversionConfig.get<T>();
@@ -99,7 +96,7 @@ class $ {
   }
 
   /// Returns the shells stdout with any trailing newline stripped. Will throw a [ShellException] if the shell process did not
-  /// exit with 0 as the status code.
+  /// exit with 0 as the exit code.
   Future<String> text() async {
     _stringResult ??= await _rawResult.then(_processResult);
     return _stringResult!.replaceAll(_trailingNewLine, "");
@@ -107,19 +104,19 @@ class $ {
 
   /// Splits the output by spaces and converts each split into the desired type [T].
   /// Will throw a [ShellException] if the shell process did not
-  /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
+  /// exit with 0 as the exit code. Will throw a [ShellResultConversionException] if cannot convert to the desired
   /// type [T].
   Future<List<T>> spaces<T extends Object>() => _callWithRegExp<T>(_spaces);
 
   /// Splits the output by newlines and converts each split into the desired type [T].
   /// Will throw a [ShellException] if the shell process did not
-  /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
+  /// exit with 0 as the exit code. Will throw a [ShellResultConversionException] if cannot convert to the desired
   /// type [T].
   Future<List<T>> lines<T extends Object>() => _callWithRegExp<T>(_newLines);
 
   /// Splits the output by whitespaces and converts each split into the desired type [T].
   /// Will throw a [ShellException] if the shell process did not
-  /// exit with 0 as the status code. Will throw a [ShellResultConversionException] if cannot convert to the desired
+  /// exit with 0 as the exit code. Will throw a [ShellResultConversionException] if cannot convert to the desired
   /// type [T].
   Future<List<T>> whitespaces<T extends Object>() =>
       _callWithRegExp<T>(_whitespaces);

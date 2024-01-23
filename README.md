@@ -4,20 +4,20 @@
 [![Dart Package Docs](https://img.shields.io/badge/documentation-pub.dev-blue.svg)](https://pub.dev/documentation/sheller/latest/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 
-Ergonomic utilities for interacting with shells and converting output. Useful for writing Dart scripts.
+Ergonomic scripting in Dart. Utilities for interacting with shells and converting output to Dart types.
 
 ```dart
 List<File> files = await $("cd $dir && find . -maxdepth 1 -type f").lines();
 ```
 ### Table of Contents
 
-1. [Examples](#examples)
+1. [Example](#examples)
 2. [Valid Conversion Types](#valid-conversion-types)
 3. [Custom Conversion Types](#custom-conversion-types)
 4. [Real Use Case - Protobuf Package Generation Script Example](#real-use-case---protobuf-package-generation-script-example)
 
-### Examples
-
+### Example
+With Sheller you can esaily write Dart scripts that interact with the host platform.
 ```dart  
 // Linux
 void main() async {
@@ -44,14 +44,14 @@ void main() async {
 ```
 
 ### Valid Conversion Types
-
+Convert `stdout` of successful shells to
 ```
 int
 double
 num
 BigInt
 String
-bool
+bool (empty is true)
 Map<String, dynamic>
 Object
 FileSystemEntity
@@ -59,7 +59,6 @@ Directory
 File
 Link
 ```
-As well as their `List` variants.
 
 ### Custom Conversion Types
 
@@ -102,6 +101,7 @@ Future<void> main() async {
   print(await $(command)());
 
   var toCopyOver = "../to_copy_over";
+  // Contains desired pubspec.yaml
   Directory(toCopyOver).copyToSync(Directory(outputDir));
 
   final generateBarrelFileCommand = "cd $outputDir && dart pub run index_generator";
