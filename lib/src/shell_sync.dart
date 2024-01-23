@@ -9,7 +9,6 @@ import 'shell_base.dart';
 /// Wrapper around [Process.run] that makes running a shell and converting the result back into a dart type more
 /// convenient
 class $ implements $Base {
-
   @override
   int get exitCode => _rawResult.exitCode;
 
@@ -50,9 +49,7 @@ class $ implements $Base {
     final workingDirectory =
         shellConfig.workingDirectory ?? io.Directory.current.path;
     final executable = io.Platform.isLinux ? "/bin/sh" : cmd;
-    final args = io.Platform.isLinux
-        ? ["-c", "''$cmd''"]
-        : <String>[];
+    final args = io.Platform.isLinux ? ["-c", "''$cmd''"] : <String>[];
     _rawResult = io.Process.runSync(
       executable,
       args,
@@ -89,20 +86,21 @@ class $ implements $Base {
 
   @override
   List<T> lines<T extends Object>() => _callWithRegExp<T>($Base.newLinesExp);
-  
+
   @override
-  List<T> whitespaces<T extends Object>() => _callWithRegExp<T>($Base.whitespacesExp);
+  List<T> whitespaces<T extends Object>() =>
+      _callWithRegExp<T>($Base.whitespacesExp);
 
   List<T> _callWithRegExp<T extends Object>(RegExp splitter) {
-    final splits = text().replaceAll($Base.trailingNewLineExp, "").split(splitter);
+    final splits =
+        text().replaceAll($Base.trailingNewLineExp, "").split(splitter);
     final converter = ShellConversionConfig.get<T>();
     return splits.map((e) => converter.convert(e)).toList();
   }
 
   @override
   Future<void> operator >(io.File file) async {
-    await file.writeAsBytes(stdout,
-        mode: io.FileMode.writeOnly, flush: true);
+    await file.writeAsBytes(stdout, mode: io.FileMode.writeOnly, flush: true);
   }
 
   @override

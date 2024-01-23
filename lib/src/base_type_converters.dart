@@ -82,9 +82,13 @@ class JsonConverter extends Converter<String, Map<String, dynamic>> {
     } catch (e1) {
       try {
         final result = json.decode(input.replaceAll("\\", ""));
-        throw ShellResultConversionException(Map<String, dynamic>, input, addtionalMessage: "Looks like this may be an escaping character issue. As removing all backslashes from the input string and trying again worked with the following result:\n $result");
+        throw ShellResultConversionException(Map<String, dynamic>, input,
+            addtionalMessage:
+                "Looks like this may be an escaping character issue. As removing all backslashes from the input string and trying again worked with the following result:\n $result");
       } catch (e2) {
-        throw ShellResultConversionException(Map<String, dynamic>, input, addtionalMessage: "Converting to json failed with the following error:\n $e1");
+        throw ShellResultConversionException(Map<String, dynamic>, input,
+            addtionalMessage:
+                "Converting to json failed with the following error:\n $e1");
       }
     }
   }

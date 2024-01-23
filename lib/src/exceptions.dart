@@ -63,10 +63,10 @@ class ShellResultConversionException implements Exception {
 
   @override
   String toString() {
-    String value ="""
+    String value = """
     ShellResultConversionException: could not convert to '$to' from '$from'
     """;
-    if(addtionalMessage != null) {
+    if (addtionalMessage != null) {
       value += """
 
       $addtionalMessage
