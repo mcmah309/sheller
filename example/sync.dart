@@ -8,7 +8,8 @@ void main() async {
   int number = $("echo 1")();
   assert(number == 1);
   // json
-  String data ='{\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}';
+  String data =
+      '{\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}';
   Map<String, dynamic> json = $('echo $data')();
   assert(json.entries.length == 3);
   // List<double>
