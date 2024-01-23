@@ -2,7 +2,7 @@
 
 import 'dart:io';
 
-import 'package:sheller/sheller.dart';
+import 'package:sheller/sheller_async.dart';
 
 void main() async {
   // int

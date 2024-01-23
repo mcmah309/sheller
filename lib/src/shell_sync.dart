@@ -99,13 +99,13 @@ class $ implements $Base {
   }
 
   @override
-  Future<void> operator >(io.File file) async {
-    await file.writeAsBytes(stdout, mode: io.FileMode.writeOnly, flush: true);
+  void operator >(io.File file) {
+    file.writeAsBytesSync(stdout, mode: io.FileMode.writeOnly, flush: true);
   }
 
   @override
-  Future<void> operator >>(io.File file) async {
-    await file.writeAsBytes(stdout,
+  void operator >>(io.File file) {
+    file.writeAsBytesSync(stdout,
         mode: io.FileMode.writeOnlyAppend, flush: true);
   }
 }

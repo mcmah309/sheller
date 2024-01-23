@@ -17,29 +17,32 @@ List<File> files = await $("cd $dir && find . -maxdepth 1 -type f").lines();
 4. [Real Use Case - Protobuf Package Generation Script Example](#real-use-case---protobuf-package-generation-script-example)
 
 ### Example
-With Sheller you can esaily write Dart scripts that interact with the host platform.
-```dart  
+With Sheller you can esaily write sync or async Dart scripts that interact with the host platform.
+```dart
+import 'sheller/sheller_sync';
+// import 'sheller/sheller_async'; // alternative
+
 // Linux
 void main() async {
   // int
-  int number = await $("echo 1")();
+  int number = $("echo 1")();
   assert(number == 1);
   // json
   String data ='{\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}';
-  Map<String, dynamic> json = await $('echo $data')();
+  Map<String, dynamic> json = $('echo $data')();
   assert(json.entries.length == 3);
   // List<double>
-  List<double> doubleList = await $('echo 1 2 3').spaces();
+  List<double> doubleList = $('echo 1 2 3').spaces();
   assert(doubleList.length == 3);
   // The class
   $ shellClass = $("echo 1");
-  int id = await shellClass.pid;
-  int convertedResult = await shellClass();
+  int id = shellClass.pid;
+  int convertedResult = shellClass();
   assert(convertedResult == 1);
   // Writing to a file
-  await ($("echo 1") > File("./temp")); // == await $("echo 1 > ./temp")();
+  $("echo 1") > File("./temp"); // == $("echo 1 > ./temp")();
   // Appending to a file
-  await ($("echo 2") >> File("./temp")); // == await $("echo 2 >> ./temp")();
+  $("echo 2") >> File("./temp"); // == $("echo 2 >> ./temp")();
 }
 ```
 
