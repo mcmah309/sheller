@@ -19,7 +19,7 @@ class ShellException implements Exception {
     String std;
     try {
       std = """
-  stdout sytem encoding: ${const SystemEncoding().decode(stdout)}
+  stdout system encoding: ${const SystemEncoding().decode(stdout)}
 
   stderr system encoding: ${const SystemEncoding().decode(stderr)}
 
@@ -57,13 +57,21 @@ $std
 class ShellResultConversionException implements Exception {
   final String from;
   final Type to;
+  final String? addtionalMessage;
 
-  ShellResultConversionException(this.to, this.from);
+  ShellResultConversionException(this.to, this.from, {this.addtionalMessage});
 
   @override
   String toString() {
-    return """
+    String value ="""
     ShellResultConversionException: could not convert to '$to' from '$from'
     """;
+    if(addtionalMessage != null) {
+      value += """
+
+      $addtionalMessage
+      """;
+    }
+    return value;
   }
 }

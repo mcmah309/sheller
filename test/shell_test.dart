@@ -45,9 +45,16 @@ void main() {
     expect(File("./temp2").readAsLinesSync(), ["2", "4"]);
   });
 
-  test('echo empty', () async {
+  test('Scho empty', () async {
     final command = 'echo ""';
     final String x = await $(command)();
-    expect(x, "\n");
+    expect(x, "");
+  });
+
+  test('String python truthy', () async {
+    bool x = await $('echo ""')();
+    expect(x, true);
+    x = await $('echo " "')();
+    expect(x, false);
   });
 }

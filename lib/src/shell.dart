@@ -2,18 +2,21 @@ import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
-import 'base_type_converters.dart';
 import 'exceptions.dart';
 import 'file_system_converters.dart';
+
+part 'base_type_converters.dart';
 
 //************************************************************************//
 
 /// Wrapper around [Process.run] that makes running a shell and converting the result back into a dart type more
 /// convenient
 class $ {
-  static final RegExp _newLines = RegExp(r'\r?\n');
+  static final RegExp _newLines = RegExp(r'[\r?\n]+');
   static final RegExp _whitespaces = RegExp(r'\s+');
-  static final RegExp _spaces = RegExp(r' ');
+  static final RegExp _spaces = RegExp(r' +');
+
+  static final RegExp _trailingNewLine = RegExp(r'[\r?\n]$');
 
   /// Exit code of the process.
   Future<int> get exitCode => _rawResult.then((value) => value.exitCode);
@@ -60,7 +63,7 @@ class $ {
         shellConfig.workingDirectory ?? io.Directory.current.path;
     final executable = io.Platform.isLinux ? "/bin/sh" : cmd;
     final args = io.Platform.isLinux
-        ? ["-c", "''${cmd.replaceAll("'", "\\'")}''"]
+        ? ["-c", "''$cmd''"]
         : <String>[];
     _rawResult = io.Process.run(
       executable,
@@ -95,11 +98,11 @@ class $ {
     return converter.convert(await text());
   }
 
-  /// Returns the shells stdout. Will throw a [ShellException] if the shell process did not
+  /// Returns the shells stdout with any trailing newline stripped. Will throw a [ShellException] if the shell process did not
   /// exit with 0 as the status code.
   Future<String> text() async {
     _stringResult ??= await _rawResult.then(_processResult);
-    return _stringResult!;
+    return _stringResult!.replaceAll(_trailingNewLine, "");
   }
 
   /// Splits the output by spaces and converts each split into the desired type [T].
@@ -123,7 +126,7 @@ class $ {
 
   Future<List<T>> _callWithRegExp<T extends Object>(RegExp splitter) async {
     final splits =
-        await text().then((e) => e.split(splitter).where((e) => e.isNotEmpty));
+        await text().then((e) => e.replaceAll(_trailingNewLine, "").split(splitter));
     final converter = ShellConversionConfig.get<T>();
     return splits.map((e) => converter.convert(e)).toList();
   }

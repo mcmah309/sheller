@@ -1,6 +1,4 @@
-import 'dart:convert';
-
-import 'exceptions.dart';
+part of 'shell.dart';
 
 class IntConverter extends Converter<String, int> {
   const IntConverter();
@@ -66,7 +64,7 @@ class BoolConverter extends Converter<String, bool> {
 
   @override
   bool convert(String input) {
-    return input.trim().isNotEmpty;
+    return input.isEmpty;
   }
 }
 
@@ -81,9 +79,10 @@ class JsonConverter extends Converter<String, Map<String, dynamic>> {
       return json.decode(input);
     } catch (e1) {
       try {
-        return json.decode(input.replaceAll("\\", ""));
+        final result = json.decode(input.replaceAll("\\", ""));
+        throw ShellResultConversionException(Map<String, dynamic>, input, addtionalMessage: "Looks like this may be an escaping character issue. As removing all backslashes from the input string and trying again worked with the following result:\n $result");
       } catch (e2) {
-        throw ShellResultConversionException(Map<String, dynamic>, input);
+        throw ShellResultConversionException(Map<String, dynamic>, input, addtionalMessage: "Converting to json failed with the following error:\n $e1");
       }
     }
   }
