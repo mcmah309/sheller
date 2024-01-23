@@ -9,49 +9,42 @@ import 'shell_base.dart';
 /// Wrapper around [Process.run] that makes running a shell and converting the result back into a dart type more
 /// convenient
 class $ implements $Base {
-  
-  @override
-  Future<int> get exitCode { 
-    return _rawResult.then((value) => value.exitCode);
-  }
-  
-  @override
-  Future<int> get pid => _rawResult.then((value) => value.pid);
-  
-  @override
-  Future<Uint8List> get stderr =>
-      _rawResult.then((value) => value.stderr as Uint8List);
 
   @override
-  Future<String> get stderrAsString async {
+  int get exitCode => _rawResult.exitCode;
+
+  @override
+  int get pid => _rawResult.pid;
+
+  @override
+  Uint8List get stderr => _rawResult.stderr as Uint8List;
+
+  @override
+  String get stderrAsString {
     if (_stderrString != null) {
       return _stderrString!;
     }
-    final rawResult = await _rawResult;
-    _stderrString = const io.SystemEncoding().decode(rawResult.stderr);
+    _stderrString = const io.SystemEncoding().decode(_rawResult.stderr);
     return _stderrString!;
   }
-  
-  @override
-  Future<Uint8List> get stdout =>
-      _rawResult.then((value) => value.stdout as Uint8List);
 
-  
   @override
-  Future<String> get stdoutAsString async {
+  Uint8List get stdout => _rawResult.stdout as Uint8List;
+
+  @override
+  String get stdoutAsString {
     if (_stdoutString != null) {
       return _stdoutString!;
     }
-    final rawResult = await _rawResult;
-    _stdoutString = const io.SystemEncoding().decode(rawResult.stdout);
+    _stdoutString = const io.SystemEncoding().decode(_rawResult.stdout);
     return _stdoutString!;
   }
 
-  late final Future<io.ProcessResult> _rawResult;
+  late final io.ProcessResult _rawResult;
   String? _stringResult;
   String? _stderrString;
   String? _stdoutString;
-  late final Future<String> Function(io.ProcessResult) _processResult;
+  late final String Function(io.ProcessResult) _processResult;
 
   $(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
     final workingDirectory =
@@ -60,7 +53,7 @@ class $ implements $Base {
     final args = io.Platform.isLinux
         ? ["-c", "''$cmd''"]
         : <String>[];
-    _rawResult = io.Process.run(
+    _rawResult = io.Process.runSync(
       executable,
       args,
       workingDirectory: workingDirectory,
@@ -70,7 +63,7 @@ class $ implements $Base {
       stdoutEncoding: null,
       stderrEncoding: null,
     );
-    _processResult = (io.ProcessResult e) async {
+    _processResult = (io.ProcessResult e) {
       if (e.exitCode != 0) {
         throw ShellException(executable, args, workingDirectory, e.exitCode,
             e.pid, e.stdout, e.stderr);
@@ -80,43 +73,41 @@ class $ implements $Base {
   }
 
   @override
-  Future<T> call<T extends Object>() async {
+  T call<T extends Object>() {
     final converter = ShellConversionConfig.get<T>();
-    return converter.convert(await text());
+    return converter.convert(text());
   }
 
   @override
-  Future<String> text() async {
-    _stringResult ??= await _rawResult.then(_processResult);
+  String text() {
+    _stringResult ??= _processResult(_rawResult);
     return _stringResult!.replaceAll($Base.trailingNewLineExp, "");
   }
 
   @override
-  Future<List<T>> spaces<T extends Object>() => _callWithRegExp<T>($Base.spacesExp);
+  List<T> spaces<T extends Object>() => _callWithRegExp<T>($Base.spacesExp);
+
+  @override
+  List<T> lines<T extends Object>() => _callWithRegExp<T>($Base.newLinesExp);
   
   @override
-  Future<List<T>> lines<T extends Object>() => _callWithRegExp<T>($Base.newLinesExp);
+  List<T> whitespaces<T extends Object>() => _callWithRegExp<T>($Base.whitespacesExp);
 
-  @override
-  Future<List<T>> whitespaces<T extends Object>() =>
-      _callWithRegExp<T>($Base.whitespacesExp);
-
-  Future<List<T>> _callWithRegExp<T extends Object>(RegExp splitter) async {
-    final splits =
-        await text().then((e) => e.replaceAll($Base.trailingNewLineExp, "").split(splitter));
+  List<T> _callWithRegExp<T extends Object>(RegExp splitter) {
+    final splits = text().replaceAll($Base.trailingNewLineExp, "").split(splitter);
     final converter = ShellConversionConfig.get<T>();
     return splits.map((e) => converter.convert(e)).toList();
   }
 
   @override
   Future<void> operator >(io.File file) async {
-    await file.writeAsBytes(await stdout,
+    await file.writeAsBytes(stdout,
         mode: io.FileMode.writeOnly, flush: true);
   }
 
   @override
   Future<void> operator >>(io.File file) async {
-    await file.writeAsBytes(await stdout,
+    await file.writeAsBytes(stdout,
         mode: io.FileMode.writeOnlyAppend, flush: true);
   }
 }
