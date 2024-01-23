@@ -7,7 +7,7 @@
 Ergonomic scripting in Dart. Utilities for interacting with shells and converting output to Dart types.
 
 ```dart
-List<File> files = await $("cd $dir && find . -maxdepth 1 -type f").lines();
+List<File> files = $("cd $dir && find . -maxdepth 1 -type f").lines();
 ```
 ### Table of Contents
 
@@ -19,11 +19,11 @@ List<File> files = await $("cd $dir && find . -maxdepth 1 -type f").lines();
 ### Example
 With Sheller you can esaily write sync or async Dart scripts that interact with the host platform.
 ```dart
-import 'sheller/sheller_sync';
-// import 'sheller/sheller_async'; // alternative
+import 'sheller/sheller_sync.dart';
+// import 'sheller/sheller_async.dart'; // alternative
 
 // Linux
-void main() async {
+void main() {
   // int
   int number = $("echo 1")();
   assert(number == 1);
@@ -84,7 +84,7 @@ ShellConversionConfig.add(const IntConverter());
 
 ### Real Use Case - Protobuf Package Generation Script Example
 ```dart
-Future<void> main() async {
+Future<void> main() {
   String osPathSeparator = path.separator;
   assert(Directory.current.path.split(osPathSeparator).last == "lib");
   var protoFilesDir = "../../../proto";
@@ -100,14 +100,13 @@ Future<void> main() async {
       .map((file) => file.path)
       .toList();
 
-  var command = "protoc -I=$protoFilesDir --dart_out=grpc:$outputSrcDir ${protoFiles.join(' ')} google/protobuf/empty.proto";
-  print(await $(command)());
+  print($("protoc -I=$protoFilesDir --dart_out=grpc:$outputSrcDir ${protoFiles.join(' ')}")());
 
   var toCopyOver = "../to_copy_over";
   // Contains desired pubspec.yaml
   Directory(toCopyOver).copyToSync(Directory(outputDir));
 
   final generateBarrelFileCommand = "cd $outputDir && dart pub run index_generator";
-  print(await $(generateBarrelFileCommand)());
+  print($(generateBarrelFileCommand)());
 }
 ```

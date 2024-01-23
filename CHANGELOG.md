@@ -1,3 +1,9 @@
+## 0.4.0
+
+- Improve ergonomics
+- Add sync implementation
+- Works on linux
+
 ## 0.3.4
 
 - Improve README
