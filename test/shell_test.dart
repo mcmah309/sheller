@@ -53,8 +53,8 @@ void main() {
 
   test('String python truthy', () async {
     bool x = await $('echo ""')();
-    expect(x, true);
-    x = await $('echo " "')();
     expect(x, false);
+    x = await $('echo " "')();
+    expect(x, true);
   });
 }

@@ -66,7 +66,7 @@ class BoolConverter extends Converter<String, bool> {
 
   @override
   bool convert(String input) {
-    return input.isEmpty;
+    return input.isNotEmpty;
   }
 }
 

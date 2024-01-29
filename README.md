@@ -54,7 +54,7 @@ double
 num
 BigInt
 String
-bool (empty is true)
+bool (empty is false)
 Map<String, dynamic>
 Object
 FileSystemEntity
