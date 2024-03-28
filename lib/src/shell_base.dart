@@ -11,7 +11,7 @@ import 'file_system_converters.dart';
 
 /// Wrapper around [Process.run] that makes running a shell and converting the result back into a dart type more
 /// convenient
-abstract class $Base {
+abstract class $ {
   static final RegExp newLinesExp = RegExp(r'[\r?\n]+');
   static final RegExp whitespacesExp = RegExp(r'\s+');
   static final RegExp spacesExp = RegExp(r' +');

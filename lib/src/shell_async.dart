@@ -2,13 +2,13 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'exceptions.dart';
-import 'shell_base.dart';
+import 'shell_base.dart' as base;
 
 //************************************************************************//
 
 /// Wrapper around [Process.run] that makes running a shell and converting the result back into a dart type more
 /// convenient
-class $ implements $Base {
+class $ implements base.$ {
   @override
   Future<int> get exitCode {
     return _rawResult.then((value) => value.exitCode);
@@ -51,7 +51,7 @@ class $ implements $Base {
   String? _stdoutString;
   late final Future<String> Function(io.ProcessResult) _processResult;
 
-  $(String cmd, [ShellConfig shellConfig = const ShellConfig()]) {
+  $(String cmd, [base.ShellConfig shellConfig = const base.ShellConfig()]) {
     final workingDirectory =
         shellConfig.workingDirectory ?? io.Directory.current.path;
     final executable = io.Platform.isLinux ? "/bin/sh" : cmd;
@@ -77,32 +77,32 @@ class $ implements $Base {
 
   @override
   Future<T> call<T extends Object>() async {
-    final converter = ShellConversionConfig.get<T>();
+    final converter = base.ShellConversionConfig.get<T>();
     return converter.convert(await text());
   }
 
   @override
   Future<String> text() async {
     _stringResult ??= await _rawResult.then(_processResult);
-    return _stringResult!.replaceAll($Base.trailingNewLineExp, "");
+    return _stringResult!.replaceAll(base.$.trailingNewLineExp, "");
   }
 
   @override
   Future<List<T>> spaces<T extends Object>() =>
-      _callWithRegExp<T>($Base.spacesExp);
+      _callWithRegExp<T>(base.$.spacesExp);
 
   @override
   Future<List<T>> lines<T extends Object>() =>
-      _callWithRegExp<T>($Base.newLinesExp);
+      _callWithRegExp<T>(base.$.newLinesExp);
 
   @override
   Future<List<T>> whitespaces<T extends Object>() =>
-      _callWithRegExp<T>($Base.whitespacesExp);
+      _callWithRegExp<T>(base.$.whitespacesExp);
 
   Future<List<T>> _callWithRegExp<T extends Object>(RegExp splitter) async {
     final splits = await text().then(
-        (e) => e.replaceAll($Base.trailingNewLineExp, "").split(splitter));
-    final converter = ShellConversionConfig.get<T>();
+        (e) => e.replaceAll(base.$.trailingNewLineExp, "").split(splitter));
+    final converter = base.ShellConversionConfig.get<T>();
     return splits.map((e) => converter.convert(e)).toList();
   }
 
