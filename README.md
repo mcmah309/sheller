@@ -86,14 +86,14 @@ ShellConfig.addConverter(const IntConverter());
 ```dart
 Future<void> main() {
   String osPathSeparator = path.separator;
-  assert(Directory.current.path.split(osPathSeparator).last == "lib");
-  var protoFilesDir = "../../../proto";
-  var outputDir = "../../generated";
-  var outputSrcDir = "../../generated/lib/src";
+  if(Directory.current.path.split(osPathSeparator).last != "lib") throw StateError("Launched from wrong directory. Current: ${Directory.current.path}");
+  final protoFilesDir = "../../../proto";
+  final outputDir = "../../generated";
+  final outputSrcDir = "../../generated/lib/src";
   Directory(outputDir).deleteSync(recursive: true);
   Directory(outputSrcDir).createSync(recursive: true);
 
-  var protoFiles = Directory(protoFilesDir)
+  final protoFiles = Directory(protoFilesDir)
       .listSync()
       .whereType<File>()
       .where((file) => file.path.endsWith(".proto"))
@@ -102,8 +102,8 @@ Future<void> main() {
 
   print($("protoc -I=$protoFilesDir --dart_out=grpc:$outputSrcDir ${protoFiles.join(' ')}")());
 
-  var toCopyOver = "../to_copy_over";
   // Contains desired pubspec.yaml
+  final toCopyOver = "../to_copy_over";
   Directory(toCopyOver).copyToSync(Directory(outputDir));
 
   final generateBarrelFileCommand = "cd $outputDir && dart pub run index_generator";
