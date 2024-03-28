@@ -1,5 +1,5 @@
 /// Synchronous ergonomic shell library for Dart.
-library sheller_sync;
+library sync;
 
 export 'src/exceptions.dart';
 export 'src/file_system_converters.dart';
