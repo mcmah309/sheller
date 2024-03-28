@@ -85,6 +85,8 @@ class ShellConfig {
     this.runInShell = true,
   });
 
+  static bool includeRawBytesOnException = false;
+
   //************************************************************************//
 
   static final Map<Object, Converter<String, Object>> _map = {

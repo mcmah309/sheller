@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:sheller/src/shell_base.dart';
+
 /// An [Exception] that happened inside the shell
 class ShellException implements Exception {
   final String executable;
@@ -11,14 +13,15 @@ class ShellException implements Exception {
   final Uint8List stdout;
   final Uint8List stderr;
 
-  ShellException(this.executable, this.args, this.workingDirectory,
-      this.exitCode, this.pid, this.stdout, this.stderr);
+  ShellException(this.executable, this.args, this.workingDirectory, this.exitCode, this.pid,
+      this.stdout, this.stderr);
 
   @override
   String toString() {
     String std;
-    try {
-      std = """
+    if (ShellConfig.includeRawBytesOnException) {
+      try {
+        std = """
   stdout system encoding: ${const SystemEncoding().decode(stdout)}
 
   stderr system encoding: ${const SystemEncoding().decode(stderr)}
@@ -27,12 +30,25 @@ class ShellException implements Exception {
 
   stderr bytes: $stderr
             """;
-    } catch (e) {
-      std = """
+      } catch (e) {
+        std = """
+  Could not decode stdout and stderr bytes to system encoding.
+
   stdout bytes: $stdout
 
   stderr bytes: $stderr
       """;
+      }
+    } else {
+      try {
+        std = """
+  stdout system encoding: ${const SystemEncoding().decode(stdout)}
+
+  stderr system encoding: ${const SystemEncoding().decode(stderr)}
+            """;
+      } catch (e) {
+        std = "Could not decode stdout and stderr bytes to system encoding.";
+      }
     }
 
     return """
