@@ -65,7 +65,7 @@ Link
 ```
 
 ### Custom Conversion Types
-
+Easily add your own custom conversion types. e.g.
 ```dart
 class IntConverter extends Converter<String, int> {
   const IntConverter();
