@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:sheller/sheller_sync.dart';
+import 'package:sheller/sync.dart';
 
 // Linux
 void main() async {

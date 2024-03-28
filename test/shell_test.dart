@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:sheller/sheller_async.dart';
+import 'package:sheller/async.dart';
 import 'package:test/test.dart';
 
 void main() {

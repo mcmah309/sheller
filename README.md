@@ -19,8 +19,8 @@ List<File> files = $("cd $dir && find . -maxdepth 1 -type f").lines();
 ### Example
 With Sheller you can esaily write sync or async Dart scripts that interact with the host platform.
 ```dart
-import 'sheller/sheller_sync.dart';
-// import 'sheller/sheller_async.dart'; // alternative
+import 'sheller/sync.dart';
+// import 'sheller/async.dart'; // alternative
 
 // Linux
 void main() {
