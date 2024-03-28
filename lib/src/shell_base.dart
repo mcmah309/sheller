@@ -110,8 +110,8 @@ class ShellConfig {
   }
 
   static Converter<String, T> getConverter<T extends Object>() {
-    assert(
-        _map.containsKey(T), "ShellConversionMap does not contain a converter for ${T.toString()}");
+    assert(_map.containsKey(T),
+        "ShellConversionMap does not contain a converter for ${T.toString()}");
     return _map[T] as Converter<String, T>;
   }
 
