@@ -1,3 +1,10 @@
+## 0.5.0
+
+- Re-organize
+    - `ShellConversionConfig` merged into `ShellConfig`
+    - Remove "sheller_" prefix from libray names
+- Add option to show raw byte output on exception and do not show by default
+
 ## 0.4.1
 
 - Bool meaning change
