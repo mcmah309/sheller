@@ -71,8 +71,22 @@ abstract class $ {
 
 //************************************************************************//
 
-/// Configuration for conversions between shell results and dart types. Can be modified at runtime.
-class ShellConversionConfig {
+/// Config for how the shell should behave
+class ShellConfig {
+  final String? workingDirectory;
+  final Map<String, String>? environment;
+  final bool includeParentEnvironment;
+  final bool runInShell;
+
+  const ShellConfig({
+    this.workingDirectory,
+    this.environment,
+    this.includeParentEnvironment = true,
+    this.runInShell = true,
+  });
+
+  //************************************************************************//
+
   static final Map<Object, Converter<String, Object>> _map = {
     int: const IntConverter(),
     double: const DoubleConverter(),
@@ -88,32 +102,18 @@ class ShellConversionConfig {
     io.Link: const LinkConverter(),
   };
 
-  static void add<T extends Object>(Converter<String, T> value) {
+  /// Configuration for conversions between shell results and dart types. Can be modified at runtime.
+  static void addConverter<T extends Object>(Converter<String, T> value) {
     _map[T] = value;
   }
 
-  static Converter<String, T> get<T extends Object>() {
-    assert(_map.containsKey(T),
-        "ShellConversionMap does not contain a converter for ${T.toString()}");
+  static Converter<String, T> getConverter<T extends Object>() {
+    assert(
+        _map.containsKey(T), "ShellConversionMap does not contain a converter for ${T.toString()}");
     return _map[T] as Converter<String, T>;
   }
 
   static bool hasConverterFor<T extends Object>() {
     return _map.containsKey(T);
   }
-}
-
-/// Config for how the shell should behave
-class ShellConfig {
-  final String? workingDirectory;
-  final Map<String, String>? environment;
-  final bool includeParentEnvironment;
-  final bool runInShell;
-
-  const ShellConfig({
-    this.workingDirectory,
-    this.environment,
-    this.includeParentEnvironment = true,
-    this.runInShell = true,
-  });
 }

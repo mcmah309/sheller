@@ -71,7 +71,7 @@ class $ implements base.$ {
 
   @override
   T call<T extends Object>() {
-    final converter = base.ShellConversionConfig.get<T>();
+    final converter = base.ShellConfig.getConverter<T>();
     return converter.convert(text());
   }
 
@@ -94,7 +94,7 @@ class $ implements base.$ {
   List<T> _callWithRegExp<T extends Object>(RegExp splitter) {
     final splits =
         text().replaceAll(base.$.trailingNewLineExp, "").split(splitter);
-    final converter = base.ShellConversionConfig.get<T>();
+    final converter = base.ShellConfig.getConverter<T>();
     return splits.map((e) => converter.convert(e)).toList();
   }
 

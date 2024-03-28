@@ -77,7 +77,7 @@ class $ implements base.$ {
 
   @override
   Future<T> call<T extends Object>() async {
-    final converter = base.ShellConversionConfig.get<T>();
+    final converter = base.ShellConfig.getConverter<T>();
     return converter.convert(await text());
   }
 
@@ -102,7 +102,7 @@ class $ implements base.$ {
   Future<List<T>> _callWithRegExp<T extends Object>(RegExp splitter) async {
     final splits = await text().then(
         (e) => e.replaceAll(base.$.trailingNewLineExp, "").split(splitter));
-    final converter = base.ShellConversionConfig.get<T>();
+    final converter = base.ShellConfig.getConverter<T>();
     return splits.map((e) => converter.convert(e)).toList();
   }
 

@@ -79,7 +79,7 @@ class IntConverter extends Converter<String, int> {
   }
 }
 
-ShellConversionConfig.add(const IntConverter());
+ShellConfig.addConverter(const IntConverter());
 ```
 
 ### Real Use Case - Protobuf Package Generation Script Example
