@@ -37,6 +37,7 @@ void main() {
   // The class
   $ shellClass = $("echo 1");
   int id = shellClass.pid;
+  int exitCode = shellClass.exitCode;
   int convertedResult = shellClass();
   assert(convertedResult == 1);
   // Writing to a file

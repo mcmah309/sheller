@@ -20,6 +20,7 @@ void main() async {
   // Class version
   $ shellClass = $("echo 1");
   int id = await shellClass.pid;
+  int exitCode = await shellClass.exitCode;
   int convertedResult = await shellClass();
   assert(convertedResult == 1);
   // Writing to a file

@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable
+
 import 'dart:io';
 
 import 'package:sheller/sync.dart';
@@ -18,6 +20,7 @@ void main() async {
   // The class
   $ shellClass = $("echo 1");
   int id = shellClass.pid;
+  int exitCode = shellClass.exitCode;
   int convertedResult = shellClass();
   assert(convertedResult == 1);
   // Writing to a file
