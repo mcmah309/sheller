@@ -16,18 +16,17 @@ void main() {
   });
 
   test('json', () async {
-    String data;
+    final Map<String, dynamic> json;
     if(Platform.isWindows){
-      data = '{"id":1, "name":"lorem ipsum", "address":"dolor set amet"}';
+      json = await $('echo {"id":1, "name":"lorem ipsum", "address":"dolor set amet"}')();
     }
     else if(Platform.isLinux || Platform.isMacOS){
-      data = '{\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}';
+      json = await $('echo {\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}')();
     }
     else {
       throw "Platform not supported.";
     }
-    final Map<String, dynamic> w = await $('echo $data')();
-    expect(w.entries.length, 3);
+    expect(json.entries.length, 3);
   });
 
   test('List<double>', () async {
