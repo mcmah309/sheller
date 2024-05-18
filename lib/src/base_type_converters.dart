@@ -88,7 +88,7 @@ class JsonConverter extends Converter<String, Map<String, dynamic>> {
       } catch (e2) {
         throw ShellResultConversionException(Map<String, dynamic>, input,
             addtionalMessage:
-                "Converting to json failed with the following error:\n $e1");
+                "Converting to json failed with the following error:\n$e1");
       }
     }
   }

@@ -12,11 +12,11 @@ import 'file_system_converters.dart';
 /// Wrapper around [Process.run] that makes running a shell and converting the result back into a dart type more
 /// convenient
 abstract class $ {
-  static final RegExp newLinesExp = RegExp(r'[\r?\n]+');
+  static final RegExp newLinesExp = RegExp(r'(\r?\n)+');
   static final RegExp whitespacesExp = RegExp(r'\s+');
   static final RegExp spacesExp = RegExp(r' +');
 
-  static final RegExp trailingNewLineExp = RegExp(r'[\r?\n]$');
+  static final RegExp trailingNewLineExp = RegExp(r'(\r?\n)$');
 
   /// Exit code of the process.
   FutureOr<int> get exitCode;
@@ -64,8 +64,28 @@ abstract class $ {
   /// type [T].
   FutureOr<List<T>> whitespaces<T extends Object>();
 
+  /// Writes to file. Platform independent. e.g.
+  /// ```dart
+  /// $("echo 1") > File("./temp");
+  /// ```
+  /// Will write "1" to file "temp".
+  /// Which is equivlent to
+  /// ```dart
+  /// $("echo 1 > ./temp")();
+  /// ```
+  /// on MacOs and Linux. But the above will write "1 " to "temp" on windows.
   FutureOr<void> operator >(io.File file);
 
+  /// Appends to file. Platform independent. e.g.
+  /// ```dart
+  /// $("echo 1") >> File("./temp");
+  /// ```
+  /// Will append "1" to file "temp".
+  /// Which is equivlent to
+  /// ```dart
+  /// $("echo 1 >> ./temp")();
+  /// ```
+  /// on MacOs and Linux. But the above will append "1 " to "temp" on windows.
   FutureOr<void> operator >>(io.File file);
 }
 
@@ -76,13 +96,11 @@ class ShellConfig {
   final String? workingDirectory;
   final Map<String, String>? environment;
   final bool includeParentEnvironment;
-  final bool runInShell;
 
   const ShellConfig({
     this.workingDirectory,
     this.environment,
     this.includeParentEnvironment = true,
-    this.runInShell = true,
   });
 
   static bool includeRawBytesOnException = false;
@@ -110,8 +128,9 @@ class ShellConfig {
   }
 
   static Converter<String, T> getConverter<T extends Object>() {
-    assert(_map.containsKey(T),
-        "ShellConversionMap does not contain a converter for ${T.toString()}");
+    if(!_map.containsKey(T)){
+        throw ShellerMissingConverterException(T);
+    }
     return _map[T] as Converter<String, T>;
   }
 

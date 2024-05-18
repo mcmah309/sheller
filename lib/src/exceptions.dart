@@ -13,8 +13,8 @@ class ShellException implements Exception {
   final Uint8List stdout;
   final Uint8List stderr;
 
-  ShellException(this.executable, this.args, this.workingDirectory,
-      this.exitCode, this.pid, this.stdout, this.stderr);
+  ShellException(this.executable, this.args, this.workingDirectory, this.exitCode, this.pid,
+      this.stdout, this.stderr);
 
   @override
   String toString() {
@@ -80,14 +80,26 @@ class ShellResultConversionException implements Exception {
   @override
   String toString() {
     String value = """
-    ShellResultConversionException: could not convert to '$to' from '$from'
+ShellResultConversionException: could not convert to '$to' from '$from'
     """;
     if (addtionalMessage != null) {
       value += """
 
-      $addtionalMessage
+$addtionalMessage
       """;
     }
     return value;
+  }
+}
+
+/// An [Exception] that happens when a converter is missing.
+class ShellerMissingConverterException implements Exception {
+  final Type type;
+
+  ShellerMissingConverterException(this.type);
+
+  @override
+  String toString() {
+    return "ShellerMissingConverterException: A converter has not been added for type `$type`.";
   }
 }
