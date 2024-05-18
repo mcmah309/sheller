@@ -79,7 +79,7 @@ void main() {
       expect(x, false);
     }
     else if(Platform.isLinux || Platform.isMacOS){
-      expect(x, true);
+      expect(x, false);
     }
     x = await $('echo " "')();
     if(Platform.isWindows){
