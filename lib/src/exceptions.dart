@@ -13,8 +13,8 @@ class ShellException implements Exception {
   final Uint8List stdout;
   final Uint8List stderr;
 
-  ShellException(this.executable, this.args, this.workingDirectory, this.exitCode, this.pid,
-      this.stdout, this.stderr);
+  ShellException(this.executable, this.args, this.workingDirectory,
+      this.exitCode, this.pid, this.stdout, this.stderr);
 
   @override
   String toString() {

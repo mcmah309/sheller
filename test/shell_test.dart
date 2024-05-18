@@ -17,13 +17,13 @@ void main() {
 
   test('json', () async {
     final Map<String, dynamic> json;
-    if(Platform.isWindows){
-      json = await $('echo {"id":1, "name":"lorem ipsum", "address":"dolor set amet"}')();
-    }
-    else if(Platform.isLinux || Platform.isMacOS){
-      json = await $('echo {\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}')();
-    }
-    else {
+    if (Platform.isWindows) {
+      json = await $(
+          'echo {"id":1, "name":"lorem ipsum", "address":"dolor set amet"}')();
+    } else if (Platform.isLinux || Platform.isMacOS) {
+      json = await $(
+          'echo {\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}')();
+    } else {
       throw "Platform not supported.";
     }
     expect(json.entries.length, 3);
@@ -35,13 +35,12 @@ void main() {
   });
 
   test('file system', () async {
-    if(Platform.isWindows){
+    if (Platform.isWindows) {
       final List<FileSystemEntity> _ = await $(r'dir /b /ad').lines();
-    }
-    else if(Platform.isLinux || Platform.isMacOS){
-      final List<FileSystemEntity> _ = await $(r'find "$(pwd)" -maxdepth 1 -type d').lines();
-    }
-    else {
+    } else if (Platform.isLinux || Platform.isMacOS) {
+      final List<FileSystemEntity> _ =
+          await $(r'find "$(pwd)" -maxdepth 1 -type d').lines();
+    } else {
       throw "Platform not supported.";
     }
   });
@@ -53,10 +52,9 @@ void main() {
     await $("echo 4 >> ./temp2")();
 
     expect(File("./temp").readAsLinesSync(), ["1", "3"]);
-    if(Platform.isWindows){
+    if (Platform.isWindows) {
       expect(File("./temp2").readAsLinesSync(), ["2 ", "4 "]);
-    }
-    else if(Platform.isLinux || Platform.isMacOS){
+    } else if (Platform.isLinux || Platform.isMacOS) {
       expect(File("./temp2").readAsLinesSync(), ["2", "4"]);
     }
   });
@@ -64,10 +62,9 @@ void main() {
   test('Echo empty', () async {
     final command = 'echo ""';
     final String x = await $(command)();
-    if(Platform.isWindows){
+    if (Platform.isWindows) {
       expect(x, '""');
-    }
-    else if(Platform.isLinux || Platform.isMacOS){
+    } else if (Platform.isLinux || Platform.isMacOS) {
       expect(x, '');
     }
   });
@@ -76,22 +73,20 @@ void main() {
     $ shell = $('echo ""');
     bool truthy = await shell();
     String text = await shell.text();
-    if(Platform.isWindows){
+    if (Platform.isWindows) {
       expect(truthy, true);
       expect(text, '""');
-    }
-    else if(Platform.isLinux || Platform.isMacOS){
+    } else if (Platform.isLinux || Platform.isMacOS) {
       expect(truthy, false);
       expect(text, '');
     }
     shell = $('echo " "');
     truthy = await shell();
     text = await shell.text();
-    if(Platform.isWindows){
+    if (Platform.isWindows) {
       expect(truthy, true);
       expect(text, '" "');
-    }
-    else if(Platform.isLinux || Platform.isMacOS){
+    } else if (Platform.isLinux || Platform.isMacOS) {
       expect(truthy, true);
       expect(text, ' ');
     }

@@ -67,8 +67,8 @@ class $ implements base.$ {
     );
     _processResult = (io.ProcessResult e) async {
       if (e.exitCode != 0) {
-        throw ShellException(platformConfig.executable, platformConfig.args, workingDirectory, e.exitCode,
-            e.pid, e.stdout, e.stderr);
+        throw ShellException(platformConfig.executable, platformConfig.args,
+            workingDirectory, e.exitCode, e.pid, e.stdout, e.stderr);
       }
       return stdoutAsString;
     };

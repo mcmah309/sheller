@@ -127,8 +127,8 @@ class ShellConfig {
   }
 
   static Converter<String, T> getConverter<T extends Object>() {
-    if(!_map.containsKey(T)){
-        throw ShellerMissingConverterException(T);
+    if (!_map.containsKey(T)) {
+      throw ShellerMissingConverterException(T);
     }
     return _map[T] as Converter<String, T>;
   }
