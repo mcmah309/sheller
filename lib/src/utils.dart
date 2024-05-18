@@ -4,7 +4,7 @@ import 'dart:io' as io;
     final String executable;
     final List<String> args;
     if(io.Platform.isWindows){
-      executable = "/C";
+      executable = "%WINDIR%\\system32\\cmd.exe";
       args = cmd.split(RegExp(r'\s+'));
     }
     else if(io.Platform.isLinux || io.Platform.isMacOS){
