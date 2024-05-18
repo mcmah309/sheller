@@ -91,3 +91,15 @@ $addtionalMessage
     return value;
   }
 }
+
+/// An [Exception] that happens when a converter is missing.
+class ShellerMissingConverterException implements Exception {
+  final Type type;
+
+  ShellerMissingConverterException(this.type);
+
+  @override
+  String toString() {
+    return "ShellerMissingConverterException: A converter has not been added for type `$type`.";
+  }
+}

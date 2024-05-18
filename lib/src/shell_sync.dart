@@ -56,7 +56,7 @@ class $ implements base.$ {
       workingDirectory: workingDirectory,
       environment: shellConfig.environment,
       includeParentEnvironment: shellConfig.includeParentEnvironment,
-      runInShell: shellConfig.runInShell,
+      runInShell: false,
       stdoutEncoding: null,
       stderrEncoding: null,
     );

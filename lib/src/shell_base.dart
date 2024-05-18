@@ -76,13 +76,11 @@ class ShellConfig {
   final String? workingDirectory;
   final Map<String, String>? environment;
   final bool includeParentEnvironment;
-  final bool runInShell;
 
   const ShellConfig({
     this.workingDirectory,
     this.environment,
     this.includeParentEnvironment = true,
-    this.runInShell = true,
   });
 
   static bool includeRawBytesOnException = false;
@@ -110,8 +108,9 @@ class ShellConfig {
   }
 
   static Converter<String, T> getConverter<T extends Object>() {
-    assert(_map.containsKey(T),
-        "ShellConversionMap does not contain a converter for ${T.toString()}");
+    if(!_map.containsKey(T)){
+        throw ShellerMissingConverterException(T);
+    }
     return _map[T] as Converter<String, T>;
   }
 
