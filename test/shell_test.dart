@@ -20,10 +20,7 @@ void main() {
     if(Platform.isWindows){
       data = '{"id":1, "name":"lorem ipsum", "address":"dolor set amet"}';
     }
-    else if(Platform.isLinux){
-      data = '{\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}';
-    }
-    else if(Platform.isMacOS){
+    else if(Platform.isLinux || Platform.isMacOS){
       data = '{\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}';
     }
     else {
@@ -42,10 +39,7 @@ void main() {
     if(Platform.isWindows){
       final List<FileSystemEntity> _ = await $(r'dir /b /ad').lines();
     }
-    else if(Platform.isLinux){
-      final List<FileSystemEntity> _ = await $(r'find "$(pwd)" -maxdepth 1 -type d').lines();
-    }
-    else if(Platform.isMacOS){
+    else if(Platform.isLinux || Platform.isMacOS){
       final List<FileSystemEntity> _ = await $(r'find "$(pwd)" -maxdepth 1 -type d').lines();
     }
     else {

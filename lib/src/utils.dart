@@ -7,11 +7,7 @@ import 'dart:io' as io;
       executable = cmd;
       args = const [];
     }
-    else if(io.Platform.isLinux){
-      executable = "/bin/sh";
-      args = ["-c", "''$cmd''"];
-    }
-    else if(io.Platform.isMacOS){
+    else if(io.Platform.isLinux || io.Platform.isMacOS){
       executable = "/bin/sh";
       args = ["-c", "''$cmd''"];
     }
