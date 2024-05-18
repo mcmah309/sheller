@@ -77,7 +77,7 @@ void main() {
     bool truthy = await shell();
     String text = await shell.text();
     if(Platform.isWindows){
-      expect(truthy, false);
+      expect(truthy, true);
       expect(text, '""');
     }
     else if(Platform.isLinux || Platform.isMacOS){
@@ -88,7 +88,7 @@ void main() {
     truthy = await shell();
     text = await shell.text();
     if(Platform.isWindows){
-      expect(truthy, false);
+      expect(truthy, true);
       expect(text, '" "');
     }
     else if(Platform.isLinux || Platform.isMacOS){
