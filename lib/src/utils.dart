@@ -7,7 +7,7 @@ PlatformConfig createPlatformExecutableAndArgs(String cmd){
     final List<String> args;
     final bool runInShell;
     if(io.Platform.isWindows){
-      executable = cmd;
+      executable = '"$cmd"';
       args = const [];
       runInShell = true;
     }
