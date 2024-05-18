@@ -1,3 +1,7 @@
+## 0.5.1
+- Adds support for MacOs
+- Fixes some edge cases for windows commands
+
 ## 0.5.0
 
 - Re-organize
