@@ -10,7 +10,7 @@ PlatformConfig createPlatformExecutableAndArgs(String cmd){
       // final result = io.Process.runSync("echo %WINDIR%", [], runInShell: true);
       // final out = result.stdout.toString().trim();
       // print("out: '$out'");
-      executable = "C:\\Windows\\system32\\cmd.exe /c $cmd";
+      executable = "C:\\Windows\\system32\\cmd.exe /c \"$cmd\"";
       args = const [];
       runInShell = false;
     }
