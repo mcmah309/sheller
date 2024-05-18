@@ -74,19 +74,27 @@ void main() {
   });
 
   test('String python truthy', () async {
-    bool x = await $('echo ""')();
+    $ shell = $('echo ""');
+    bool truthy = await shell();
+    String text = await shell.text();
     if(Platform.isWindows){
-      expect(x, false);
+      expect(truthy, false);
+      expect(text, '""');
     }
     else if(Platform.isLinux || Platform.isMacOS){
-      expect(x, false);
+      expect(truthy, false);
+      expect(text, '');
     }
-    x = await $('echo " "')();
+    shell = $('echo " "');
+    truthy = await shell();
+    text = await shell.text();
     if(Platform.isWindows){
-      expect(x, false);
+      expect(truthy, false);
+      expect(text, '" "');
     }
     else if(Platform.isLinux || Platform.isMacOS){
-      expect(x, true);
+      expect(truthy, true);
+      expect(text, ' ');
     }
   });
 }
