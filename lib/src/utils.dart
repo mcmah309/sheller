@@ -2,19 +2,30 @@ import 'dart:io' as io;
 
 import 'shell_base.dart';
 
-(String, List<String>) createPlatformExecutableAndArgs(String cmd){
+PlatformConfig createPlatformExecutableAndArgs(String cmd){
     final String executable;
     final List<String> args;
+    final bool runInShell;
     if(io.Platform.isWindows){
-      executable = "C:\\WINDOWS\\system32\\cmd.exe";
-      args = ["/c", "'$cmd'"];
+      executable = cmd;
+      args = const [];
+      runInShell = true;
     }
     else if(io.Platform.isLinux || io.Platform.isMacOS){
       executable = "/bin/sh";
       args = ["-c", "''$cmd''"];
+      runInShell = false;
     }
     else {
       throw "Platform not supported.";
     }
-    return (executable, args);
+    return PlatformConfig(executable, args, runInShell);
+}
+
+class PlatformConfig {
+  final String executable;
+  final List<String> args;
+  final bool runInshell;
+
+  PlatformConfig(this.executable, this.args, this.runInshell);
 }

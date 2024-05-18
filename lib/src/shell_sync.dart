@@ -49,20 +49,20 @@ class $ implements base.$ {
   $(String cmd, [base.ShellConfig shellConfig = const base.ShellConfig()]) {
     final workingDirectory =
         shellConfig.workingDirectory ?? io.Directory.current.path;
-    final (executable, args) = createPlatformExecutableAndArgs(cmd);
+    final platformConfig = createPlatformExecutableAndArgs(cmd);
     _rawResult = io.Process.runSync(
-      executable,
-      args,
+      platformConfig.executable,
+      platformConfig.args,
       workingDirectory: workingDirectory,
       environment: shellConfig.environment,
       includeParentEnvironment: shellConfig.includeParentEnvironment,
-      runInShell: false,
+      runInShell: platformConfig.runInshell,
       stdoutEncoding: null,
       stderrEncoding: null,
     );
     _processResult = (io.ProcessResult e) {
       if (e.exitCode != 0) {
-        throw ShellException(executable, args, workingDirectory, e.exitCode,
+        throw ShellException(platformConfig.executable, platformConfig.args, workingDirectory, e.exitCode,
             e.pid, e.stdout, e.stderr);
       }
       return stdoutAsString;
