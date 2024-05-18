@@ -7,8 +7,7 @@ import 'utils.dart';
 
 //************************************************************************//
 
-/// Wrapper around [Process.run] that makes running a shell and converting the result back into a dart type more
-/// convenient
+/// A host platform process that run non-interactively to completion.
 class $ implements base.$ {
   @override
   int get exitCode => _rawResult.exitCode;
