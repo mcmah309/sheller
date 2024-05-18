@@ -1,7 +1,9 @@
 import 'dart:io' as io;
 
-import 'shell_base.dart';
-
+// Dev Note: Escape characters are added to commands by [io.Process]. We don't want that. And there are some existing bugs related to how they are added.
+// Related issues:
+// https://github.com/dart-lang/sdk/issues/42571
+// https://github.com/dart-lang/sdk/issues/50076
 PlatformConfig createPlatformExecutableAndArgs(String cmd){
     final String executable;
     final List<String> args;
