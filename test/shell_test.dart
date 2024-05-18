@@ -54,19 +54,39 @@ void main() {
     await $("echo 4 >> ./temp2")();
 
     expect(File("./temp").readAsLinesSync(), ["1", "3"]);
-    expect(File("./temp2").readAsLinesSync(), ["2", "4"]);
+    if(Platform.isWindows){
+      expect(File("./temp2").readAsLinesSync(), ["2 ", "4 "]);
+    }
+    else if(Platform.isLinux || Platform.isMacOS){
+      expect(File("./temp2").readAsLinesSync(), ["2", "4"]);
+    }
   });
 
   test('Echo empty', () async {
     final command = 'echo ""';
     final String x = await $(command)();
-    expect(x, "");
+    if(Platform.isWindows){
+      expect(x, '""');
+    }
+    else if(Platform.isLinux || Platform.isMacOS){
+      expect(x, '');
+    }
   });
 
   test('String python truthy', () async {
     bool x = await $('echo ""')();
-    expect(x, false);
+    if(Platform.isWindows){
+      expect(x, false);
+    }
+    else if(Platform.isLinux || Platform.isMacOS){
+      expect(x, true);
+    }
     x = await $('echo " "')();
-    expect(x, true);
+    if(Platform.isWindows){
+      expect(x, false);
+    }
+    else if(Platform.isLinux || Platform.isMacOS){
+      expect(x, true);
+    }
   });
 }

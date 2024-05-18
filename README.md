@@ -41,9 +41,9 @@ void main() {
   int convertedResult = shellClass();
   assert(convertedResult == 1);
   // Writing to a file
-  $("echo 1") > File("./temp"); // == $("echo 1 > ./temp")();
+  $("echo 1") > File("./temp");
   // Appending to a file
-  $("echo 2") >> File("./temp"); // == $("echo 2 >> ./temp")();
+  $("echo 2") >> File("./temp");
 }
 ```
 

@@ -64,8 +64,28 @@ abstract class $ {
   /// type [T].
   FutureOr<List<T>> whitespaces<T extends Object>();
 
+  /// Writes to file. Platform independent. e.g.
+  /// ```dart
+  /// $("echo 1") > File("./temp");
+  /// ```
+  /// Will write "1" to file "temp".
+  /// Which is equivlent to
+  /// ```dart
+  /// $("echo 1 > ./temp")();
+  /// ```
+  /// on MacOs and Linux. But the above will write "1 " to "temp" on windows.
   FutureOr<void> operator >(io.File file);
 
+  /// Appends to file. Platform independent. e.g.
+  /// ```dart
+  /// $("echo 1") >> File("./temp");
+  /// ```
+  /// Will append "1" to file "temp".
+  /// Which is equivlent to
+  /// ```dart
+  /// $("echo 1 >> ./temp")();
+  /// ```
+  /// on MacOs and Linux. But the above will append "1 " to "temp" on windows.
   FutureOr<void> operator >>(io.File file);
 }
 
