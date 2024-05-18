@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'exceptions.dart';
 import 'shell_base.dart' as base;
+import 'utils.dart';
 
 //************************************************************************//
 
@@ -54,8 +55,7 @@ class $ implements base.$ {
   $(String cmd, [base.ShellConfig shellConfig = const base.ShellConfig()]) {
     final workingDirectory =
         shellConfig.workingDirectory ?? io.Directory.current.path;
-    final executable = io.Platform.isLinux ? "/bin/sh" : cmd;
-    final args = io.Platform.isLinux ? ["-c", "''$cmd''"] : <String>[];
+    final (executable, args) = createPlatformExecutableAndArgs(cmd);
     _rawResult = io.Process.run(
       executable,
       args,
