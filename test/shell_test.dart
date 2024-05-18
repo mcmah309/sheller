@@ -16,9 +16,19 @@ void main() {
   });
 
   test('json', () async {
-    String data = Platform.isWindows
-        ? '{"id":1, "name":"lorem ipsum", "address":"dolor set amet"}'
-        : '{\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}';
+    String data;
+    if(Platform.isWindows){
+      data = '{"id":1, "name":"lorem ipsum", "address":"dolor set amet"}';
+    }
+    else if(Platform.isLinux){
+      data = '{\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}';
+    }
+    else if(Platform.isMacOS){
+      data = '{\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}';
+    }
+    else {
+      throw "Platform not supported.";
+    }
     final Map<String, dynamic> w = await $('echo $data')();
     expect(w.entries.length, 3);
   });
@@ -29,10 +39,18 @@ void main() {
   });
 
   test('file system', () async {
-    final command = Platform.isWindows
-        ? 'dir /b /ad'
-        : 'find "\$(pwd)" -maxdepth 1 -type d';
-    final List<FileSystemEntity> _ = await $(command).lines();
+    if(Platform.isWindows){
+      final List<FileSystemEntity> _ = await $(r'dir /b /ad').lines();
+    }
+    else if(Platform.isLinux){
+      final List<FileSystemEntity> _ = await $(r'find "$(pwd)" -maxdepth 1 -type d').lines();
+    }
+    else if(Platform.isMacOS){
+      final List<FileSystemEntity> _ = await $(r'find "$(pwd)" -maxdepth 1 -type d').lines();
+    }
+    else {
+      throw "Platform not supported.";
+    }
   });
 
   test('Writing to file', () async {
