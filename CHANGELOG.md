@@ -1,3 +1,6 @@
+## 1.0.0
+- Stabilize api
+
 ## 0.5.1
 - Adds support for MacOs
 - Fixes some edge cases for windows commands
