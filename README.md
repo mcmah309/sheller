@@ -15,10 +15,10 @@ List<File> files = $("cd $dir && find . -maxdepth 1 -type f").lines();
 1. [Example](#examples)
 2. [Valid Conversion Types](#valid-conversion-types)
 3. [Custom Conversion Types](#custom-conversion-types)
-4. [Real Use Case - Protobuf Package Generation Script Example](#real-use-case---protobuf-package-generation-script-example)
+4. [Real Use Case - Protobuf Package Generation Script](#real-use-case---protobuf-package-generation-script)
 
 ### Example
-With Sheller you can esaily write sync or async Dart scripts that interact with the host platform on `Linux`, `MacOs`, or `Windows`.
+With Sheller you can easily write sync or async Dart scripts that interact with the host platform on `Linux`, `MacOs`, or `Windows`.
 ```dart
 import 'sheller/sync.dart';
 // import 'sheller/async.dart'; // alternative
@@ -88,12 +88,9 @@ class IntConverter extends Converter<String, int> {
 ShellConfig.addConverter(const IntConverter());
 ```
 
-### Real Use Case - Protobuf Package Generation Script Example
+### Real Use Case - Protobuf Package Generation Script
 ```dart
 void main() async {
-  String osPathSeparator = path.separator;
-  if(Directory.current.path.split(osPathSeparator).last != "generator") throw StateError("Launched from wrong current directory.");
-  if(Directory("bin").listSync(recursive: true).length != 1) throw StateError("Directory not clean.");
   const protoFilesDir = "../../proto";
   const outputDir = "../generated";
   const outputSrcDir = "../generated/lib/src";
@@ -109,8 +106,8 @@ void main() async {
       .map((file) => file.path)
       .toList();
 
-  final command = "protoc -I=$protoFilesDir --dart_out=grpc:$outputSrcDir ${protoFiles.join(' ')}";
-  print($(command)());
+  final generateDartProtoFilesCommand = "protoc -I=$protoFilesDir --dart_out=grpc:$outputSrcDir ${protoFiles.join(' ')}";
+  print($(generateDartProtoFilesCommand)());
 
   // Contains desired pubspec.yaml
   const toCopyOver = "./to_copy_over";
