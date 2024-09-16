@@ -1,6 +1,6 @@
 name: sheller
 description: Ergonomic scripting in Dart. Utilities for interacting with shells and converting output to Dart types. Replace your bash or python scripts with pure Dart.
-version: 1.0.0
+version: 1.0.1
 repository: https://github.com/mcmah309/sheller
 
 environment:

@@ -1,3 +1,6 @@
+## 1.0.1
+- Update Doc
+
 ## 1.0.0
 - Stabilize api
 
