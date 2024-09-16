@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:sheller/async.dart';
@@ -18,8 +19,7 @@ void main() {
   test('json', () async {
     final Map<String, dynamic> json;
     if (Platform.isWindows) {
-      json = await $(
-          'echo {"id":1, "name":"lorem ipsum", "address":"dolor set amet"}')();
+      json = await $('echo {"id":1, "name":"lorem ipsum", "address":"dolor set amet"}')();
     } else if (Platform.isLinux || Platform.isMacOS) {
       json = await $(
           'echo {\\"id\\":1, \\"name\\":\\"lorem ipsum\\", \\"address\\":\\"dolor set amet\\"}')();
@@ -38,8 +38,7 @@ void main() {
     if (Platform.isWindows) {
       final List<FileSystemEntity> _ = await $(r'dir /b /ad').lines();
     } else if (Platform.isLinux || Platform.isMacOS) {
-      final List<FileSystemEntity> _ =
-          await $(r'find "$(pwd)" -maxdepth 1 -type d').lines();
+      final List<FileSystemEntity> _ = await $(r'find "$(pwd)" -maxdepth 1 -type d').lines();
     } else {
       throw "Platform not supported.";
     }
@@ -91,4 +90,23 @@ void main() {
       expect(text, ' ');
     }
   });
+
+  test('custom converter', () async {
+    ShellConfig.addConverter(const IntConverter());
+    int number = await $("echo 1")();
+    assert(number == 99999);
+  });
+}
+
+class IntConverter extends Converter<String, int> {
+  const IntConverter();
+
+  @override
+  int convert(String input) {
+    int? result = int.tryParse(input);
+    if (result == null) {
+      throw ShellConversionException(int, input);
+    }
+    return 99999;
+  }
 }
