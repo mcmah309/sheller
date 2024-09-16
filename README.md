@@ -71,7 +71,7 @@ Link
 ```
 
 ### Custom Conversion Types
-Easily add your own custom conversion types. e.g.
+Easily add your own custom conversion types to convert the output of the shell to a dart type. e.g.
 ```dart
 class IntConverter extends Converter<String, int> {
   const IntConverter();
@@ -82,11 +82,15 @@ class IntConverter extends Converter<String, int> {
     if (result == null) {
       throw ShellConversionException(int, input);
     }
-    return result;
+    return 99999;
   }
 }
 
-ShellConfig.addConverter(const IntConverter());
+void main() {
+  ShellConfig.addConverter(const IntConverter());
+  int number = $("echo 1")();
+  assert(number == 99999);
+}
 ```
 
 ### Real Use Case - Protobuf Package Generation Script
