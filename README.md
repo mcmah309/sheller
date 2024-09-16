@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://github.com/mcmah309/sheller/actions/workflows/dart.yml/badge.svg)](https://github.com/mcmah309/sheller/actions)
 
-Sheller brings ergonomic scripting to Dart by providing utilities for interacting with shells and converting output to Dart types. Allowing users to replace their bash or python scripts with pure Dart. e.g.
+Sheller brings ergonomic scripting to Dart by providing utilities for interacting with shells and converting output to Dart types. Allowing users to replace most or all of their scripts (e.g. bash or python) with Dart. e.g.
 ```dart
 List<File> files = $("cd $dir && find . -maxdepth 1 -type f").lines();
 ```
