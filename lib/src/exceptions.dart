@@ -70,12 +70,12 @@ $std
 }
 
 /// An [Exception] that happen when converting the shell result to the desired result type
-class ShellResultConversionException implements Exception {
+class ShellConversionException implements Exception {
   final String from;
   final Type to;
   final String? addtionalMessage;
 
-  ShellResultConversionException(this.to, this.from, {this.addtionalMessage});
+  ShellConversionException(this.to, this.from, {this.addtionalMessage});
 
   @override
   String toString() {

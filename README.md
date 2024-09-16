@@ -80,7 +80,7 @@ class IntConverter extends Converter<String, int> {
   int convert(String input) {
     int? result = int.tryParse(input);
     if (result == null) {
-      throw ShellResultConversionException(int, input);
+      throw ShellConversionException(int, input);
     }
     return result;
   }

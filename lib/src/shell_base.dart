@@ -37,7 +37,7 @@ abstract class $ {
 
   /// Converts into the desired type [T].
   /// Will throw a [ShellException] if the shell process did not
-  /// exit with 0 as the exit code. Will throw a [ShellResultConversionException] if cannot convert to the desired
+  /// exit with 0 as the exit code. Will throw a [ShellConversionException] if cannot convert to the desired
   /// type [T].
   FutureOr<T> call<T extends Object>();
 
@@ -47,19 +47,19 @@ abstract class $ {
 
   /// Splits the output by spaces and converts each split into the desired type [T].
   /// Will throw a [ShellException] if the shell process did not
-  /// exit with 0 as the exit code. Will throw a [ShellResultConversionException] if cannot convert to the desired
+  /// exit with 0 as the exit code. Will throw a [ShellConversionException] if cannot convert to the desired
   /// type [T].
   FutureOr<List<T>> spaces<T extends Object>();
 
   /// Splits the output by newlines and converts each split into the desired type [T].
   /// Will throw a [ShellException] if the shell process did not
-  /// exit with 0 as the exit code. Will throw a [ShellResultConversionException] if cannot convert to the desired
+  /// exit with 0 as the exit code. Will throw a [ShellConversionException] if cannot convert to the desired
   /// type [T].
   FutureOr<List<T>> lines<T extends Object>();
 
   /// Splits the output by whitespaces and converts each split into the desired type [T].
   /// Will throw a [ShellException] if the shell process did not
-  /// exit with 0 as the exit code. Will throw a [ShellResultConversionException] if cannot convert to the desired
+  /// exit with 0 as the exit code. Will throw a [ShellConversionException] if cannot convert to the desired
   /// type [T].
   FutureOr<List<T>> whitespaces<T extends Object>();
 

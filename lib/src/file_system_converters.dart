@@ -15,7 +15,7 @@ class FileSystemEntityConverter extends Converter<String, FileSystemEntity> {
     } else if (FileSystemEntity.isLinkSync(input)) {
       return Link(input);
     }
-    throw ShellResultConversionException(FileSystemEntity, input,
+    throw ShellConversionException(FileSystemEntity, input,
         addtionalMessage: "The input was not an existing FileSystemEntity.");
   }
 }
@@ -31,7 +31,7 @@ class FileConverter extends Converter<String, File> {
     if (file.existsSync()) {
       return file;
     }
-    throw ShellResultConversionException(File, input,
+    throw ShellConversionException(File, input,
         addtionalMessage: "The input was not an existing File.");
   }
 }
@@ -47,7 +47,7 @@ class DirectoryConverter extends Converter<String, Directory> {
     if (directory.existsSync()) {
       return directory;
     }
-    throw ShellResultConversionException(Directory, input,
+    throw ShellConversionException(Directory, input,
         addtionalMessage: "The input was not an existing Directory.");
   }
 }
@@ -63,7 +63,7 @@ class LinkConverter extends Converter<String, Link> {
     if (link.existsSync()) {
       return link;
     }
-    throw ShellResultConversionException(Link, input,
+    throw ShellConversionException(Link, input,
         addtionalMessage: "The input was not an existing Link.");
   }
 }

@@ -9,7 +9,7 @@ class IntConverter extends Converter<String, int> {
   int convert(String input) {
     int? result = int.tryParse(input);
     if (result == null) {
-      throw ShellResultConversionException(int, input);
+      throw ShellConversionException(int, input);
     }
     return result;
   }
@@ -22,7 +22,7 @@ class DoubleConverter extends Converter<String, double> {
   double convert(String input) {
     double? result = double.tryParse(input);
     if (result == null) {
-      throw ShellResultConversionException(double, input);
+      throw ShellConversionException(double, input);
     }
     return result;
   }
@@ -35,7 +35,7 @@ class NumConverter extends Converter<String, num> {
   num convert(String input) {
     return int.tryParse(input) ??
         double.tryParse(input) ??
-        (throw ShellResultConversionException(num, input));
+        (throw ShellConversionException(num, input));
   }
 }
 
@@ -47,7 +47,7 @@ class BigIntConverter extends Converter<String, BigInt> {
     try {
       return BigInt.parse(input);
     } catch (e) {
-      throw ShellResultConversionException(BigInt, input);
+      throw ShellConversionException(BigInt, input);
     }
   }
 }
@@ -82,11 +82,11 @@ class JsonConverter extends Converter<String, Map<String, dynamic>> {
     } catch (e1) {
       try {
         final result = json.decode(input.replaceAll("\\", ""));
-        throw ShellResultConversionException(Map<String, dynamic>, input,
+        throw ShellConversionException(Map<String, dynamic>, input,
             addtionalMessage:
                 "Looks like this may be an escaping character issue. As removing all backslashes from the input string and trying again worked with the following result:\n $result");
       } catch (e2) {
-        throw ShellResultConversionException(Map<String, dynamic>, input,
+        throw ShellConversionException(Map<String, dynamic>, input,
             addtionalMessage:
                 "Converting to json failed with the following error:\n$e1");
       }
