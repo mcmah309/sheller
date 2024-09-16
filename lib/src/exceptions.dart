@@ -80,7 +80,7 @@ class ShellConversionException implements Exception {
   @override
   String toString() {
     String value = """
-ShellResultConversionException: could not convert to '$to' from '$from'
+ShellConversionException: could not convert to '$to' from '$from'
     """;
     if (addtionalMessage != null) {
       value += """
@@ -93,13 +93,13 @@ $addtionalMessage
 }
 
 /// An [Exception] that happens when a converter is missing.
-class ShellerMissingConverterException implements Exception {
+class MissingConverterException implements Exception {
   final Type type;
 
-  ShellerMissingConverterException(this.type);
+  MissingConverterException(this.type);
 
   @override
   String toString() {
-    return "ShellerMissingConverterException: A converter has not been added for type `$type`.";
+    return "MissingConverterException: A converter has not been added for type `$type`.";
   }
 }
